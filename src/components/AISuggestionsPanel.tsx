@@ -32,6 +32,16 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
     );
   }
 
+  const safe = {
+    ...analysis,
+    red_flags: analysis.red_flags ?? [],
+    immediate_management: analysis.immediate_management ?? [],
+    missed_possibilities: analysis.missed_possibilities ?? [],
+    differentials: analysis.differentials ?? [],
+    investigations: analysis.investigations ?? [],
+    treatment: analysis.treatment ?? [],
+  };
+
   return (
     <div className="space-y-4">
       {/* Primary Diagnosis & Emergency Level */}
@@ -41,20 +51,20 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
             <Stethoscope className="h-5 w-5 text-primary" />
             <h3 className="font-semibold text-foreground">Primary Diagnosis</h3>
           </div>
-          {emergencyBadge(analysis.emergency_level)}
+          {emergencyBadge(safe.emergency_level)}
         </div>
-        <p className="text-sm text-foreground/90 font-medium">{analysis.primary_diagnosis}</p>
+        <p className="text-sm text-foreground/90 font-medium">{safe.primary_diagnosis}</p>
       </div>
 
       {/* Red Flags */}
-      {analysis.red_flags.length > 0 && (
+      {safe.red_flags.length > 0 && (
         <div className="alert-critical border rounded-lg p-4 space-y-2">
           <div className="flex items-center gap-2 font-semibold">
             <ShieldAlert className="h-4 w-4" />
             Red Flags
           </div>
           <ul className="space-y-1 text-sm">
-            {analysis.red_flags.map((flag, i) => (
+            {safe.red_flags.map((flag, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-destructive shrink-0" />
                 {flag}
@@ -65,14 +75,14 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
       )}
 
       {/* Immediate Management */}
-      {analysis.immediate_management.length > 0 && (
+      {safe.immediate_management.length > 0 && (
         <div className="alert-warning border rounded-lg p-4 space-y-2">
           <div className="flex items-center gap-2 font-semibold">
             <Siren className="h-4 w-4" />
             Immediate Management
           </div>
           <ol className="space-y-1 text-sm">
-            {analysis.immediate_management.map((step, i) => (
+            {safe.immediate_management.map((step, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="text-warning font-semibold shrink-0">{i + 1}.</span>
                 {step}
@@ -83,14 +93,14 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
       )}
 
       {/* Missed Possibilities */}
-      {analysis.missed_possibilities.length > 0 && (
+      {safe.missed_possibilities.length > 0 && (
         <div className="alert-warning border rounded-lg p-4 space-y-2">
           <div className="flex items-center gap-2 font-semibold">
             <AlertTriangle className="h-4 w-4" />
             Missed Possibilities
           </div>
           <ul className="space-y-1 text-sm">
-            {analysis.missed_possibilities.map((risk, i) => (
+            {safe.missed_possibilities.map((risk, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
                 {risk}
@@ -104,7 +114,7 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
       <div className="glass-card p-4 space-y-2">
         <h3 className="font-semibold text-foreground">Differential Diagnoses (Ranked)</h3>
         <ol className="space-y-1.5 text-sm text-foreground/80">
-          {analysis.differentials.map((dx, i) => (
+          {safe.differentials.map((dx, i) => (
             <li key={i} className="flex items-start gap-2">
               <span className="text-primary font-semibold shrink-0">{i + 1}.</span>
               {dx}
@@ -120,7 +130,7 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
           <h3 className="font-semibold text-foreground">Recommended Investigations</h3>
         </div>
         <ul className="space-y-1.5 text-sm text-foreground/80">
-          {analysis.investigations.map((test, i) => (
+          {safe.investigations.map((test, i) => (
             <li key={i} className="flex items-start gap-2">
               <span className="text-primary shrink-0">→</span>
               {test}
@@ -136,7 +146,7 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
           Treatment Plan
         </div>
         <ol className="space-y-1 text-sm">
-          {analysis.treatment.map((step, i) => (
+          {safe.treatment.map((step, i) => (
             <li key={i} className="flex items-start gap-2">
               <span className="text-success font-semibold shrink-0">{i + 1}.</span>
               {step}
@@ -146,7 +156,7 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
       </div>
 
       {/* Clinical Reasoning */}
-      {analysis.reasoning && (
+      {safe.reasoning && (
         reasoningLocked ? (
           <div className="glass-card p-4 space-y-3 relative overflow-hidden">
             <div className="flex items-center gap-2">
@@ -155,7 +165,7 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
               <Lock className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
             </div>
             <p className="text-sm text-muted-foreground/50 leading-relaxed blur-sm select-none" aria-hidden>
-              {analysis.reasoning}
+              {safe.reasoning}
             </p>
             <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
               <Button size="sm" className="gap-1.5">
@@ -170,7 +180,7 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
               <Brain className="h-4 w-4 text-primary" />
               <h3 className="font-semibold text-foreground">Clinical Reasoning</h3>
             </div>
-            <p className="text-sm text-foreground/80 leading-relaxed">{analysis.reasoning}</p>
+            <p className="text-sm text-foreground/80 leading-relaxed">{safe.reasoning}</p>
           </div>
         )
       )}
