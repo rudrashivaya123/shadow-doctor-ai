@@ -22,10 +22,31 @@ const Index = () => {
     setLastSymptoms(symptoms);
     setLastNotes(notes);
     try {
-      const result = await mockAnalyze(symptoms, notes, language);
-      setAnalysis(result);
-    } catch {
-      console.error("Analysis failed");
+      const { data, error } = await supabase.functions.invoke("analyze-consultation", {
+        body: { symptoms, notes, language },
+      });
+
+      if (error) {
+        throw new Error(error.message || "Analysis failed");
+      }
+
+      if (data?.error) {
+        toast({
+          title: "Analysis Error",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setAnalysis(data as ClinicalAnalysis);
+    } catch (err) {
+      console.error("Analysis failed:", err);
+      toast({
+        title: "Analysis Failed",
+        description: "Could not connect to AI engine. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
