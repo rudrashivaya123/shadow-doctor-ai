@@ -3,6 +3,7 @@ import { Activity, Shield, LogOut, Stethoscope, Image as ImageIcon } from "lucid
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ConsultationInput from "@/components/ConsultationInput";
@@ -13,21 +14,28 @@ import ImageUpload from "@/components/ImageUpload";
 import ImageDiagnosisPanel from "@/components/ImageDiagnosisPanel";
 import LanguageToggle from "@/components/LanguageToggle";
 import TrialBanner from "@/components/TrialBanner";
-import type { Language, ClinicalAnalysis, ImageDiagnosis } from "@/types/clinical";
+import SpecialtySelector from "@/components/SpecialtySelector";
+import OfflineIndicator from "@/components/OfflineIndicator";
+import RiskScoreBadge from "@/components/RiskScoreBadge";
+import LearningMode from "@/components/LearningMode";
+import type { Language, Specialty, ClinicalAnalysis, ImageDiagnosis } from "@/types/clinical";
 
 const Index = () => {
   const { toast } = useToast();
   const { user, signOut } = useAuth();
   const [language, setLanguage] = useState<Language>("en");
+  const [specialty, setSpecialty] = useState<Specialty>("general");
+  const [learningMode, setLearningMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<ClinicalAnalysis | null>(null);
   const [lastSymptoms, setLastSymptoms] = useState("");
   const [lastNotes, setLastNotes] = useState("");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
-  // Image diagnosis state
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageDiagnosis, setImageDiagnosis] = useState<ImageDiagnosis | null>(null);
+
+  const { isOnline, pendingCount, addToQueue, markSynced, queue } = useOfflineSync();
 
   const saveConsultation = async (symptoms: string, notes: string, result: ClinicalAnalysis) => {
     const { error } = await supabase.from("consultations").insert({
@@ -44,13 +52,13 @@ const Index = () => {
     }
   };
 
-  const handleSubmit = useCallback(async (symptoms: string, notes: string) => {
+  const runAnalysis = useCallback(async (symptoms: string, notes: string, offlineId?: string) => {
     setIsLoading(true);
     setLastSymptoms(symptoms);
     setLastNotes(notes);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-consultation", {
-        body: { symptoms, notes, language },
+        body: { symptoms, notes, language, specialty, learningMode },
       });
 
       if (error) throw new Error(error.message || "Analysis failed");
@@ -63,6 +71,7 @@ const Index = () => {
       const result = data as ClinicalAnalysis;
       setAnalysis(result);
       await saveConsultation(symptoms, notes, result);
+      if (offlineId) markSynced(offlineId);
     } catch (err) {
       console.error("Analysis failed:", err);
       toast({
@@ -73,7 +82,27 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [language, user]);
+  }, [language, specialty, learningMode, user]);
+
+  const handleSubmit = useCallback(async (symptoms: string, notes: string) => {
+    if (!isOnline) {
+      addToQueue(symptoms, notes, language, specialty);
+      toast({
+        title: "Saved Offline",
+        description: "Your consultation will be analyzed when you're back online.",
+      });
+      return;
+    }
+    runAnalysis(symptoms, notes);
+  }, [isOnline, language, specialty, runAnalysis, addToQueue]);
+
+  const handleSyncAll = useCallback(async () => {
+    const pending = queue.filter((e) => !e.synced);
+    for (const entry of pending) {
+      await runAnalysis(entry.symptoms, entry.notes, entry.id);
+    }
+    toast({ title: "Sync Complete", description: `${pending.length} consultation(s) synced.` });
+  }, [queue, runAnalysis]);
 
   const handleImageSubmit = useCallback(async (imageBase64: string, mimeType: string, context: string) => {
     setIsImageLoading(true);
@@ -122,6 +151,7 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <OfflineIndicator isOnline={isOnline} pendingCount={pendingCount} onSync={handleSyncAll} />
             <LanguageToggle language={language} onChange={setLanguage} />
             <Button variant="ghost" size="icon" onClick={signOut} title="Sign out">
               <LogOut className="h-4 w-4" />
@@ -133,9 +163,12 @@ const Index = () => {
       <main className="container px-4 py-4 md:py-6 space-y-4">
         <TrialBanner />
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Shield className="h-3.5 w-3.5 shrink-0" />
-          <span>AI-assisted decision support tool only. No patient data is stored permanently.</span>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Shield className="h-3.5 w-3.5 shrink-0" />
+            <span>AI-assisted decision support tool only.</span>
+          </div>
+          <SpecialtySelector value={specialty} onChange={setSpecialty} />
         </div>
 
         <Tabs defaultValue="text" className="w-full">
@@ -154,6 +187,8 @@ const Index = () => {
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
               <div className="lg:col-span-2 space-y-4">
                 <ConsultationInput onSubmit={handleSubmit} isLoading={isLoading} language={language} />
+                {analysis && <RiskScoreBadge score={analysis.risk_score} level={analysis.emergency_level} />}
+                <LearningMode enabled={learningMode} onToggle={setLearningMode} analysis={analysis} />
                 <ConsultationHistory onSelect={handleSelectHistory} refreshKey={historyRefreshKey} />
                 {analysis && (
                   <ConsultationSummary symptoms={lastSymptoms} notes={lastNotes} analysis={analysis} />

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Mic, MicOff, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { useTypingSuggestions } from "@/hooks/useTypingSuggestions";
 import type { Language } from "@/types/clinical";
 
 interface ConsultationInputProps {
@@ -25,14 +27,28 @@ const placeholders: Record<Language, { symptoms: string; notes: string }> = {
   },
 };
 
+const categoryColor: Record<string, string> = {
+  symptom: "bg-primary/20 text-primary border-primary/30",
+  condition: "bg-warning/20 text-warning border-warning/30",
+  test: "bg-success/20 text-success border-success/30",
+};
+
 const ConsultationInput = ({ onSubmit, isLoading, language }: ConsultationInputProps) => {
   const [symptoms, setSymptoms] = useState("");
   const [notes, setNotes] = useState("");
   const [isRecording, setIsRecording] = useState(false);
 
+  const suggestions = useTypingSuggestions(symptoms);
+
   const handleSubmit = () => {
     if (!symptoms.trim()) return;
     onSubmit(symptoms, notes);
+  };
+
+  const applySuggestion = (text: string) => {
+    const words = symptoms.split(/[\s,]+/);
+    words[words.length - 1] = text;
+    setSymptoms(words.join(", ") + ", ");
   };
 
   const toggleRecording = () => {
@@ -40,7 +56,6 @@ const ConsultationInput = ({ onSubmit, isLoading, language }: ConsultationInputP
       setIsRecording(false);
     } else {
       setIsRecording(true);
-      // Voice recording placeholder - would use Web Speech API
       if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
         const SpeechRecognition =
           (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -85,12 +100,28 @@ const ConsultationInput = ({ onSubmit, isLoading, language }: ConsultationInputP
         </div>
       )}
 
-      <Textarea
-        placeholder={ph.symptoms}
-        value={symptoms}
-        onChange={(e) => setSymptoms(e.target.value)}
-        className="min-h-[120px] bg-muted/50 border-border/60 resize-none"
-      />
+      <div className="relative">
+        <Textarea
+          placeholder={ph.symptoms}
+          value={symptoms}
+          onChange={(e) => setSymptoms(e.target.value)}
+          className="min-h-[120px] bg-muted/50 border-border/60 resize-none"
+        />
+        {suggestions.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {suggestions.map((s) => (
+              <Badge
+                key={s.text}
+                variant="outline"
+                className={`${categoryColor[s.category]} cursor-pointer text-[10px] hover:scale-105 transition-transform`}
+                onClick={() => applySuggestion(s.text)}
+              >
+                {s.text}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
 
       <Textarea
         placeholder={ph.notes}
