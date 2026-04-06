@@ -199,7 +199,7 @@ const Index = () => {
                 )}
               </div>
               <div className="lg:col-span-3">
-                <AISuggestionsPanel analysis={analysis} />
+                <AISuggestionsPanel analysis={analysis} reasoningLocked={locked} />
               </div>
             </div>
           </TabsContent>
