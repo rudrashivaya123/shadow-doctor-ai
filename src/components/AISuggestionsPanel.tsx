@@ -1,9 +1,11 @@
-import { AlertTriangle, AlertCircle, CheckCircle, Siren, Stethoscope, Brain, FlaskConical, Pill, ShieldAlert } from "lucide-react";
+import { AlertTriangle, AlertCircle, CheckCircle, Siren, Stethoscope, Brain, FlaskConical, Pill, ShieldAlert, Lock, Crown } from "lucide-react";
 import type { ClinicalAnalysis } from "@/types/clinical";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface AISuggestionsPanelProps {
   analysis: ClinicalAnalysis | null;
+  reasoningLocked?: boolean;
 }
 
 const emergencyBadge = (level: string) => {
@@ -14,7 +16,7 @@ const emergencyBadge = (level: string) => {
   return <Badge variant="secondary" className="text-xs gap-1"><CheckCircle className="h-3 w-3" />Low</Badge>;
 };
 
-const AISuggestionsPanel = ({ analysis }: AISuggestionsPanelProps) => {
+const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestionsPanelProps) => {
   if (!analysis) {
     return (
       <div className="glass-card p-6 flex items-center justify-center min-h-[400px]">
@@ -145,13 +147,32 @@ const AISuggestionsPanel = ({ analysis }: AISuggestionsPanelProps) => {
 
       {/* Clinical Reasoning */}
       {analysis.reasoning && (
-        <div className="glass-card p-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <Brain className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-foreground">Clinical Reasoning</h3>
+        reasoningLocked ? (
+          <div className="glass-card p-4 space-y-3 relative overflow-hidden">
+            <div className="flex items-center gap-2">
+              <Brain className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold text-foreground">Clinical Reasoning</h3>
+              <Lock className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
+            </div>
+            <p className="text-sm text-muted-foreground/50 leading-relaxed blur-sm select-none" aria-hidden>
+              {analysis.reasoning}
+            </p>
+            <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
+              <Button size="sm" className="gap-1.5">
+                <Crown className="h-3.5 w-3.5" />
+                Upgrade to Unlock
+              </Button>
+            </div>
           </div>
-          <p className="text-sm text-foreground/80 leading-relaxed">{analysis.reasoning}</p>
-        </div>
+        ) : (
+          <div className="glass-card p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Brain className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold text-foreground">Clinical Reasoning</h3>
+            </div>
+            <p className="text-sm text-foreground/80 leading-relaxed">{analysis.reasoning}</p>
+          </div>
+        )
       )}
     </div>
   );

@@ -18,6 +18,8 @@ import SpecialtySelector from "@/components/SpecialtySelector";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import RiskScoreBadge from "@/components/RiskScoreBadge";
 import LearningMode from "@/components/LearningMode";
+import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
+import FeatureGate from "@/components/FeatureGate";
 import type { Language, Specialty, ClinicalAnalysis, ImageDiagnosis } from "@/types/clinical";
 
 const Index = () => {
@@ -36,6 +38,8 @@ const Index = () => {
   const [imageDiagnosis, setImageDiagnosis] = useState<ImageDiagnosis | null>(null);
 
   const { isOnline, pendingCount, addToQueue, markSynced, queue } = useOfflineSync();
+  const trial = useTrialStatus();
+  const locked = isFeatureLocked(trial);
 
   const saveConsultation = async (symptoms: string, notes: string, result: ClinicalAnalysis) => {
     const { error } = await supabase.from("consultations").insert({
@@ -161,7 +165,7 @@ const Index = () => {
       </header>
 
       <main className="container px-4 py-4 md:py-6 space-y-4">
-        <TrialBanner />
+        <TrialBanner trial={trial} />
 
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -195,20 +199,24 @@ const Index = () => {
                 )}
               </div>
               <div className="lg:col-span-3">
-                <AISuggestionsPanel analysis={analysis} />
+                <AISuggestionsPanel analysis={analysis} reasoningLocked={locked} />
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="image" className="mt-4">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-              <div className="lg:col-span-2">
-                <ImageUpload onSubmit={handleImageSubmit} isLoading={isImageLoading} language={language} />
+            {locked ? (
+              <FeatureGate featureName="Image Diagnosis" />
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                <div className="lg:col-span-2">
+                  <ImageUpload onSubmit={handleImageSubmit} isLoading={isImageLoading} language={language} />
+                </div>
+                <div className="lg:col-span-3">
+                  <ImageDiagnosisPanel diagnosis={imageDiagnosis} />
+                </div>
               </div>
-              <div className="lg:col-span-3">
-                <ImageDiagnosisPanel diagnosis={imageDiagnosis} />
-              </div>
-            </div>
+            )}
           </TabsContent>
         </Tabs>
       </main>
