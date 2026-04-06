@@ -10,6 +10,7 @@ import TrialBanner from "@/components/TrialBanner";
 import type { Language, ClinicalAnalysis } from "@/types/clinical";
 
 const Index = () => {
+  const { toast } = useToast();
   const [language, setLanguage] = useState<Language>("en");
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<ClinicalAnalysis | null>(null);
