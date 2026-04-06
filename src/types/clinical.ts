@@ -22,3 +22,21 @@ export interface Alert {
   type: "critical" | "warning" | "safe";
   message: string;
 }
+
+export interface ImageDiagnosis {
+  ai_summary: string;
+  possible_diagnoses: {
+    name: string;
+    confidence: number;
+    description: string;
+  }[];
+  key_visual_findings: string[];
+  diagnostic_criteria: {
+    matched: string[];
+    missing: string[];
+  };
+  red_flags: string[];
+  urgency_level: "Low" | "Moderate" | "HIGH RISK";
+  suggested_tests: string[];
+  next_steps: string[];
+}

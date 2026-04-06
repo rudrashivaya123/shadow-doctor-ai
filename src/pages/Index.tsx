@@ -1,16 +1,19 @@
 import { useState, useCallback } from "react";
-import { Activity, Shield, LogOut } from "lucide-react";
+import { Activity, Shield, LogOut, Stethoscope, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ConsultationInput from "@/components/ConsultationInput";
 import AISuggestionsPanel from "@/components/AISuggestionsPanel";
 import ConsultationSummary from "@/components/ConsultationSummary";
 import ConsultationHistory from "@/components/ConsultationHistory";
+import ImageUpload from "@/components/ImageUpload";
+import ImageDiagnosisPanel from "@/components/ImageDiagnosisPanel";
 import LanguageToggle from "@/components/LanguageToggle";
 import TrialBanner from "@/components/TrialBanner";
-import type { Language, ClinicalAnalysis } from "@/types/clinical";
+import type { Language, ClinicalAnalysis, ImageDiagnosis } from "@/types/clinical";
 
 const Index = () => {
   const { toast } = useToast();
@@ -21,6 +24,10 @@ const Index = () => {
   const [lastSymptoms, setLastSymptoms] = useState("");
   const [lastNotes, setLastNotes] = useState("");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+
+  // Image diagnosis state
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [imageDiagnosis, setImageDiagnosis] = useState<ImageDiagnosis | null>(null);
 
   const saveConsultation = async (symptoms: string, notes: string, result: ClinicalAnalysis) => {
     const { error } = await supabase.from("consultations").insert({
@@ -68,6 +75,33 @@ const Index = () => {
     }
   }, [language, user]);
 
+  const handleImageSubmit = useCallback(async (imageBase64: string, mimeType: string, context: string) => {
+    setIsImageLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-image", {
+        body: { imageBase64, mimeType, context, language },
+      });
+
+      if (error) throw new Error(error.message || "Image analysis failed");
+
+      if (data?.error) {
+        toast({ title: "Analysis Error", description: data.error, variant: "destructive" });
+        return;
+      }
+
+      setImageDiagnosis(data as ImageDiagnosis);
+    } catch (err) {
+      console.error("Image analysis failed:", err);
+      toast({
+        title: "Image Analysis Failed",
+        description: "Could not analyze the image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImageLoading(false);
+    }
+  }, [language]);
+
   const handleSelectHistory = (c: any) => {
     setLastSymptoms(c.symptoms);
     setLastNotes(c.notes);
@@ -104,19 +138,44 @@ const Index = () => {
           <span>AI-assisted decision support tool only. No patient data is stored permanently.</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-2 space-y-4">
-            <ConsultationInput onSubmit={handleSubmit} isLoading={isLoading} language={language} />
-            <ConsultationHistory onSelect={handleSelectHistory} refreshKey={historyRefreshKey} />
-            {analysis && (
-              <ConsultationSummary symptoms={lastSymptoms} notes={lastNotes} analysis={analysis} />
-            )}
-          </div>
+        <Tabs defaultValue="text" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="text" className="gap-1.5">
+              <Stethoscope className="h-3.5 w-3.5" />
+              Symptoms
+            </TabsTrigger>
+            <TabsTrigger value="image" className="gap-1.5">
+              <ImageIcon className="h-3.5 w-3.5" />
+              Image Dx
+            </TabsTrigger>
+          </TabsList>
 
-          <div className="lg:col-span-3">
-            <AISuggestionsPanel analysis={analysis} />
-          </div>
-        </div>
+          <TabsContent value="text" className="mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+              <div className="lg:col-span-2 space-y-4">
+                <ConsultationInput onSubmit={handleSubmit} isLoading={isLoading} language={language} />
+                <ConsultationHistory onSelect={handleSelectHistory} refreshKey={historyRefreshKey} />
+                {analysis && (
+                  <ConsultationSummary symptoms={lastSymptoms} notes={lastNotes} analysis={analysis} />
+                )}
+              </div>
+              <div className="lg:col-span-3">
+                <AISuggestionsPanel analysis={analysis} />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="image" className="mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+              <div className="lg:col-span-2">
+                <ImageUpload onSubmit={handleImageSubmit} isLoading={isImageLoading} language={language} />
+              </div>
+              <div className="lg:col-span-3">
+                <ImageDiagnosisPanel diagnosis={imageDiagnosis} />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
