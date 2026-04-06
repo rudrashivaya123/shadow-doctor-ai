@@ -39,8 +39,9 @@ const ConsultationSummary = ({ symptoms, notes, analysis }: ConsultationSummaryP
 
         <div>
           <span className="font-semibold text-primary">A — Assessment:</span>
+          <p className="text-foreground/80 mt-1 font-medium">{analysis.primary_diagnosis}</p>
           <ul className="text-foreground/80 mt-1 space-y-0.5">
-            {analysis.differential_diagnosis.map((dx, i) => (
+            {analysis.differentials.map((dx, i) => (
               <li key={i}>
                 {i + 1}. {dx}
               </li>
@@ -51,8 +52,8 @@ const ConsultationSummary = ({ symptoms, notes, analysis }: ConsultationSummaryP
         <div>
           <span className="font-semibold text-primary">P — Plan:</span>
           <ul className="text-foreground/80 mt-1 space-y-0.5">
-            {analysis.tests_suggested.map((test, i) => (
-              <li key={i}>• {test}</li>
+            {analysis.treatment.map((step, i) => (
+              <li key={i}>• {step}</li>
             ))}
           </ul>
         </div>

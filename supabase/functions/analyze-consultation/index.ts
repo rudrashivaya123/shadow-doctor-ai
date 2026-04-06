@@ -6,18 +6,19 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const systemPrompt = `You are a senior clinical decision support AI trained on standard textbooks (Harrison's Principles of Internal Medicine, Davidson's Principles and Practice of Medicine, Nelson Textbook of Pediatrics) and WHO/ICMR guidelines.
+const systemPrompt = `You are an advanced clinical decision support AI trained on standard textbooks (Harrison's Principles of Internal Medicine, Davidson's Principles and Practice of Medicine, Nelson Textbook of Pediatrics) and WHO/ICMR guidelines.
 
 Your role:
-- Assist doctors by providing a second opinion
+- Assist doctors by providing a structured second opinion
 - Identify missed diagnoses and dangerous conditions early
-- Use practical clinical reasoning grounded in evidence-based medicine
+- Highlight emergency situations that require immediate action
 
 Rules:
 - Be concise and precise
-- Prioritize life-threatening conditions first
+- Prioritize life-threatening conditions and patient safety above all
 - Do NOT over-diagnose — only include clinically relevant differentials
 - Consider epidemiological context and patient demographics
+- Provide clinical reasoning for your assessment
 - Flag time-sensitive conditions that require urgent action
 
 You MUST respond by calling the provided tool with structured clinical data. Never return plain text.`;
@@ -48,7 +49,7 @@ serve(async (req) => {
 Doctor notes: ${notes || "None provided"}
 Language preference: ${langLabel}
 
-Analyze this consultation and provide structured clinical decision support. If the language preference is Hindi or Marathi, provide the output in that language.`;
+Analyze this consultation. Identify the primary diagnosis, rank differentials, assign an emergency level, and provide immediate management, investigations, treatment plan, red flags, missed possibilities, and clinical reasoning. If the language preference is Hindi or Marathi, provide the output in that language.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -71,38 +72,60 @@ Analyze this consultation and provide structured clinical decision support. If t
               parameters: {
                 type: "object",
                 properties: {
-                  differential_diagnosis: {
+                  primary_diagnosis: {
+                    type: "string",
+                    description: "The most likely primary diagnosis with brief reasoning",
+                  },
+                  differentials: {
                     type: "array",
                     items: { type: "string" },
-                    description: "Top 3-5 differential diagnoses with brief reasoning",
+                    description: "Ranked differential diagnoses (top 3-5)",
                   },
-                  missed_risks: {
+                  emergency_level: {
+                    type: "string",
+                    enum: ["Low", "Moderate", "HIGH RISK"],
+                    description: "Emergency triage level",
+                  },
+                  immediate_management: {
                     type: "array",
                     items: { type: "string" },
-                    description: "Critical conditions that might be missed",
+                    description: "Immediate life-saving management steps",
                   },
-                  questions_to_ask: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Key questions the doctor should ask the patient",
-                  },
-                  tests_suggested: {
+                  investigations: {
                     type: "array",
                     items: { type: "string" },
                     description: "Recommended lab tests and investigations",
+                  },
+                  treatment: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Treatment plan steps",
                   },
                   red_flags: {
                     type: "array",
                     items: { type: "string" },
                     description: "Critical warning signs to watch for",
                   },
+                  missed_possibilities: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Conditions that might be overlooked",
+                  },
+                  reasoning: {
+                    type: "string",
+                    description: "Clinical reasoning explaining the assessment",
+                  },
                 },
                 required: [
-                  "differential_diagnosis",
-                  "missed_risks",
-                  "questions_to_ask",
-                  "tests_suggested",
+                  "primary_diagnosis",
+                  "differentials",
+                  "emergency_level",
+                  "immediate_management",
+                  "investigations",
+                  "treatment",
                   "red_flags",
+                  "missed_possibilities",
+                  "reasoning",
                 ],
                 additionalProperties: false,
               },

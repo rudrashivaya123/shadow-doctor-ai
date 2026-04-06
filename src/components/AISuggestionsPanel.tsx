@@ -1,9 +1,18 @@
-import { AlertTriangle, AlertCircle, CheckCircle } from "lucide-react";
+import { AlertTriangle, AlertCircle, CheckCircle, Siren, Stethoscope, Brain, FlaskConical, Pill, ShieldAlert } from "lucide-react";
 import type { ClinicalAnalysis } from "@/types/clinical";
+import { Badge } from "@/components/ui/badge";
 
 interface AISuggestionsPanelProps {
   analysis: ClinicalAnalysis | null;
 }
+
+const emergencyBadge = (level: string) => {
+  if (level === "HIGH RISK")
+    return <Badge variant="destructive" className="text-xs gap-1"><Siren className="h-3 w-3" />🚨 HIGH RISK</Badge>;
+  if (level === "Moderate")
+    return <Badge className="bg-warning text-warning-foreground text-xs gap-1"><AlertTriangle className="h-3 w-3" />⚠️ Moderate</Badge>;
+  return <Badge variant="secondary" className="text-xs gap-1"><CheckCircle className="h-3 w-3" />Low</Badge>;
+};
 
 const AISuggestionsPanel = ({ analysis }: AISuggestionsPanelProps) => {
   if (!analysis) {
@@ -23,11 +32,23 @@ const AISuggestionsPanel = ({ analysis }: AISuggestionsPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Primary Diagnosis & Emergency Level */}
+      <div className="glass-card p-4 space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <Stethoscope className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold text-foreground">Primary Diagnosis</h3>
+          </div>
+          {emergencyBadge(analysis.emergency_level)}
+        </div>
+        <p className="text-sm text-foreground/90 font-medium">{analysis.primary_diagnosis}</p>
+      </div>
+
       {/* Red Flags */}
       {analysis.red_flags.length > 0 && (
         <div className="alert-critical border rounded-lg p-4 space-y-2">
           <div className="flex items-center gap-2 font-semibold">
-            <AlertTriangle className="h-4 w-4" />
+            <ShieldAlert className="h-4 w-4" />
             Red Flags
           </div>
           <ul className="space-y-1 text-sm">
@@ -41,15 +62,33 @@ const AISuggestionsPanel = ({ analysis }: AISuggestionsPanelProps) => {
         </div>
       )}
 
-      {/* Missed Risks */}
-      {analysis.missed_risks.length > 0 && (
+      {/* Immediate Management */}
+      {analysis.immediate_management.length > 0 && (
+        <div className="alert-warning border rounded-lg p-4 space-y-2">
+          <div className="flex items-center gap-2 font-semibold">
+            <Siren className="h-4 w-4" />
+            Immediate Management
+          </div>
+          <ol className="space-y-1 text-sm">
+            {analysis.immediate_management.map((step, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="text-warning font-semibold shrink-0">{i + 1}.</span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Missed Possibilities */}
+      {analysis.missed_possibilities.length > 0 && (
         <div className="alert-warning border rounded-lg p-4 space-y-2">
           <div className="flex items-center gap-2 font-semibold">
             <AlertTriangle className="h-4 w-4" />
             Missed Possibilities
           </div>
           <ul className="space-y-1 text-sm">
-            {analysis.missed_risks.map((risk, i) => (
+            {analysis.missed_possibilities.map((risk, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-warning shrink-0" />
                 {risk}
@@ -59,11 +98,11 @@ const AISuggestionsPanel = ({ analysis }: AISuggestionsPanelProps) => {
         </div>
       )}
 
-      {/* Differential Diagnosis */}
+      {/* Differential Diagnoses */}
       <div className="glass-card p-4 space-y-2">
-        <h3 className="font-semibold text-foreground">Differential Diagnoses</h3>
+        <h3 className="font-semibold text-foreground">Differential Diagnoses (Ranked)</h3>
         <ol className="space-y-1.5 text-sm text-foreground/80">
-          {analysis.differential_diagnosis.map((dx, i) => (
+          {analysis.differentials.map((dx, i) => (
             <li key={i} className="flex items-start gap-2">
               <span className="text-primary font-semibold shrink-0">{i + 1}.</span>
               {dx}
@@ -72,34 +111,48 @@ const AISuggestionsPanel = ({ analysis }: AISuggestionsPanelProps) => {
         </ol>
       </div>
 
-      {/* Questions to Ask */}
+      {/* Investigations */}
       <div className="glass-card p-4 space-y-2">
-        <h3 className="font-semibold text-foreground">Questions to Ask</h3>
+        <div className="flex items-center gap-2">
+          <FlaskConical className="h-4 w-4 text-primary" />
+          <h3 className="font-semibold text-foreground">Recommended Investigations</h3>
+        </div>
         <ul className="space-y-1.5 text-sm text-foreground/80">
-          {analysis.questions_to_ask.map((q, i) => (
+          {analysis.investigations.map((test, i) => (
             <li key={i} className="flex items-start gap-2">
               <span className="text-primary shrink-0">→</span>
-              {q}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Suggested Tests */}
-      <div className="alert-safe border rounded-lg p-4 space-y-2">
-        <div className="flex items-center gap-2 font-semibold">
-          <CheckCircle className="h-4 w-4" />
-          Suggested Investigations
-        </div>
-        <ul className="space-y-1 text-sm">
-          {analysis.tests_suggested.map((test, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-success shrink-0" />
               {test}
             </li>
           ))}
         </ul>
       </div>
+
+      {/* Treatment Plan */}
+      <div className="alert-safe border rounded-lg p-4 space-y-2">
+        <div className="flex items-center gap-2 font-semibold">
+          <Pill className="h-4 w-4" />
+          Treatment Plan
+        </div>
+        <ol className="space-y-1 text-sm">
+          {analysis.treatment.map((step, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <span className="text-success font-semibold shrink-0">{i + 1}.</span>
+              {step}
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      {/* Clinical Reasoning */}
+      {analysis.reasoning && (
+        <div className="glass-card p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <Brain className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold text-foreground">Clinical Reasoning</h3>
+          </div>
+          <p className="text-sm text-foreground/80 leading-relaxed">{analysis.reasoning}</p>
+        </div>
+      )}
     </div>
   );
 };
