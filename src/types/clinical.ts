@@ -7,11 +7,15 @@ export interface ClinicalInput {
 }
 
 export interface ClinicalAnalysis {
-  differential_diagnosis: string[];
-  missed_risks: string[];
-  questions_to_ask: string[];
-  tests_suggested: string[];
+  primary_diagnosis: string;
+  differentials: string[];
+  emergency_level: string;
+  immediate_management: string[];
+  investigations: string[];
+  treatment: string[];
   red_flags: string[];
+  missed_possibilities: string[];
+  reasoning: string;
 }
 
 export interface Alert {
