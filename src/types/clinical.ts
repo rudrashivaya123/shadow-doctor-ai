@@ -1,9 +1,12 @@
 export type Language = "en" | "hi" | "mr";
 
+export type Specialty = "general" | "pediatrics" | "orthopedics";
+
 export interface ClinicalInput {
   symptoms: string;
   doctorNotes: string;
   language: Language;
+  specialty?: Specialty;
 }
 
 export interface ClinicalAnalysis {
@@ -16,6 +19,11 @@ export interface ClinicalAnalysis {
   red_flags: string[];
   missed_possibilities: string[];
   reasoning: string;
+  risk_score?: number;
+  learning_explanations?: {
+    diagnosis: string;
+    explanation: string;
+  }[];
 }
 
 export interface Alert {
@@ -39,4 +47,19 @@ export interface ImageDiagnosis {
   urgency_level: "Low" | "Moderate" | "HIGH RISK";
   suggested_tests: string[];
   next_steps: string[];
+}
+
+export interface QuickSuggestion {
+  text: string;
+  category: "symptom" | "condition" | "test";
+}
+
+export interface OfflineEntry {
+  id: string;
+  symptoms: string;
+  notes: string;
+  language: Language;
+  specialty: Specialty;
+  timestamp: number;
+  synced: boolean;
 }
