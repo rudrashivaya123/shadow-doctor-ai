@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
 import { Activity, Shield } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import ConsultationInput from "@/components/ConsultationInput";
 import AISuggestionsPanel from "@/components/AISuggestionsPanel";
 import ConsultationSummary from "@/components/ConsultationSummary";
@@ -7,45 +9,8 @@ import LanguageToggle from "@/components/LanguageToggle";
 import TrialBanner from "@/components/TrialBanner";
 import type { Language, ClinicalAnalysis } from "@/types/clinical";
 
-// Mock AI analysis — replace with real API call
-const mockAnalyze = async (symptoms: string, notes: string, language: Language): Promise<ClinicalAnalysis> => {
-  await new Promise((r) => setTimeout(r, 1500));
-
-  return {
-    differential_diagnosis: [
-      "Dengue Fever — high-grade fever with body aches and thrombocytopenia risk",
-      "Viral Upper Respiratory Infection — common, self-limiting",
-      "Malaria — endemic area, must rule out with blood smear",
-      "Typhoid Fever — consider if fever >5 days with GI symptoms",
-      "Chikungunya — joint pain with fever in monsoon season",
-    ],
-    missed_risks: [
-      "Dengue hemorrhagic fever — check platelet count urgently",
-      "Leptospirosis — ask about water exposure during monsoon",
-    ],
-    questions_to_ask: [
-      "Any recent travel to endemic areas?",
-      "History of water logging or flooding near residence?",
-      "Any bleeding from gums or petechiae?",
-      "Is the patient taking any self-medication (NSAIDs)?",
-      "Any sick contacts or family members with similar symptoms?",
-    ],
-    tests_suggested: [
-      "CBC with platelet count",
-      "Dengue NS1 antigen + IgM/IgG",
-      "Peripheral blood smear for malaria",
-      "Widal test (if fever >5 days)",
-      "Liver function tests",
-    ],
-    red_flags: [
-      "If platelet count <100,000 — monitor for dengue hemorrhagic fever",
-      "Avoid NSAIDs/Aspirin until dengue is ruled out",
-      "Watch for signs of plasma leakage (rising hematocrit, pleural effusion)",
-    ],
-  };
-};
-
 const Index = () => {
+  const { toast } = useToast();
   const [language, setLanguage] = useState<Language>("en");
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<ClinicalAnalysis | null>(null);
@@ -57,10 +22,31 @@ const Index = () => {
     setLastSymptoms(symptoms);
     setLastNotes(notes);
     try {
-      const result = await mockAnalyze(symptoms, notes, language);
-      setAnalysis(result);
-    } catch {
-      console.error("Analysis failed");
+      const { data, error } = await supabase.functions.invoke("analyze-consultation", {
+        body: { symptoms, notes, language },
+      });
+
+      if (error) {
+        throw new Error(error.message || "Analysis failed");
+      }
+
+      if (data?.error) {
+        toast({
+          title: "Analysis Error",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setAnalysis(data as ClinicalAnalysis);
+    } catch (err) {
+      console.error("Analysis failed:", err);
+      toast({
+        title: "Analysis Failed",
+        description: "Could not connect to AI engine. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
