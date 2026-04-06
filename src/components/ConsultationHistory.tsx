@@ -99,7 +99,7 @@ const ConsultationHistory = ({ onSelect, refreshKey }: ConsultationHistoryProps)
                       minute: "2-digit",
                     })}
                     {" · "}
-                    {((c.analysis as any).differentials || (c.analysis as any).differential_diagnosis || []).length} diagnoses
+                    {((c.analysis as any)?.differentials || (c.analysis as any)?.differential_diagnosis || []).length} diagnoses
                   </p>
                 </div>
                 <Button
