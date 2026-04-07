@@ -80,7 +80,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create user account
+    // Try to create user account
+    let userId: string;
+    let isExistingUser = false;
+
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
       password,
@@ -89,18 +92,61 @@ Deno.serve(async (req) => {
     });
 
     if (createError) {
-      // User might already exist — try to tell them to sign in
+      // User already exists — try signing them in
       if (createError.message?.includes("already been registered")) {
+        isExistingUser = true;
+
+        // Sign in to verify password and get user ID
+        const anonClient = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_ANON_KEY")!
+        );
+        const { data: signInData, error: signInError } = await anonClient.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError || !signInData?.user) {
+          return new Response(
+            JSON.stringify({ error: "This email is already registered. Please sign in with the correct password." }),
+            { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        userId = signInData.user.id;
+
+        // Check if this user already has an active subscription
+        const { data: existingSub } = await adminClient
+          .from("subscriptions")
+          .select("plan_status, subscription_end_date")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (existingSub) {
+          // Return existing session directly
+          return new Response(
+            JSON.stringify({
+              success: true,
+              trial_end: existingSub.subscription_end_date,
+              session: signInData.session
+                ? {
+                    access_token: signInData.session.access_token,
+                    refresh_token: signInData.session.refresh_token,
+                  }
+                : null,
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else {
+        console.error("User creation error:", createError);
         return new Response(
-          JSON.stringify({ error: "This email is already registered. Please sign in instead." }),
-          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "Failed to create account. Please try again." }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.error("User creation error:", createError);
-      return new Response(
-        JSON.stringify({ error: "Failed to create account. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    } else {
+      userId = newUser.user!.id;
     }
 
     const userId = newUser.user!.id;
