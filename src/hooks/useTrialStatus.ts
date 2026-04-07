@@ -39,12 +39,11 @@ export const useTrialStatus = (): TrialStatus => {
       }
 
       if (!data) {
-        // No subscription row — create a trial entry
-        const { error: insertError } = await supabase.from("subscriptions").insert({
+        // No subscription row — create a trial entry (ignore duplicate errors from race conditions)
+        await supabase.from("subscriptions").insert({
           user_id: user.id,
           plan_status: "trial",
         });
-        if (insertError) console.error("Failed to create trial:", insertError);
         setStatus({
           isTrialActive: true,
           daysRemaining: 3,
