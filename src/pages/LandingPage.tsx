@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Activity, Brain, Stethoscope, FileText, Shield, ArrowRight,
   CheckCircle, Star, Zap, Users, ChevronRight, Lock,
 } from "lucide-react";
+import TrialRegistrationModal from "@/components/TrialRegistrationModal";
 import { Button } from "@/components/ui/button";
 import AppFooter from "@/components/AppFooter";
 
@@ -36,6 +37,7 @@ const pricingFeatures = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [showTrialModal, setShowTrialModal] = useState(false);
 
   const scrollToPricing = () => {
     document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
@@ -89,7 +91,7 @@ const LandingPage = () => {
               <Button
                 size="lg"
                 className="gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 px-8 text-base font-semibold shadow-lg shadow-success/20"
-                onClick={() => navigate("/auth")}
+                onClick={() => setShowTrialModal(true)}
               >
                 Start 3-Day Free Trial — No Payment Required <ArrowRight className="h-4 w-4" />
               </Button>
@@ -169,7 +171,7 @@ const LandingPage = () => {
                 </ul>
                 <Button
                   className="w-full gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 text-base font-semibold shadow-lg shadow-success/20"
-                  onClick={() => navigate("/auth")}
+                  onClick={() => setShowTrialModal(true)}
                 >
                   Start Free Trial <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -192,6 +194,15 @@ const LandingPage = () => {
       </main>
 
       <AppFooter />
+
+      <TrialRegistrationModal
+        open={showTrialModal}
+        onClose={() => setShowTrialModal(false)}
+        onSuccess={() => {
+          setShowTrialModal(false);
+          navigate("/dashboard");
+        }}
+      />
     </div>
   );
 };
