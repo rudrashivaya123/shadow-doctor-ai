@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useCallback } from "react";
-import { TestingModeProvider } from "@/contexts/TestingModeContext";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
 import AppLayout from "@/components/AppLayout";
@@ -18,8 +17,6 @@ import ConsultationDetail from "./pages/ConsultationDetail";
 import HistoryPage from "./pages/HistoryPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import LandingPage from "./pages/LandingPage";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import RefundPolicy from "./pages/RefundPolicy";
@@ -78,9 +75,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, isDemoUser } = useAuth();
+  const { user, loading } = useAuth();
   if (loading) return null;
-  if (user && !isDemoUser) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
 
@@ -90,30 +87,17 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <TestingModeProvider>
-          <Routes>
-            <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
-            <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-            <Route path="/admin-secret-shadowmd" element={<AdminLogin />} />
-            <Route path="/admin-secret-shadowmd/dashboard" element={<AdminDashboard />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsConditions />} />
-            <Route path="/refund" element={<RefundPolicy />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/support" element={<SupportPage />} />
-            <Route path="/dashboard/*" element={<ProtectedRoute><ProtectedApp /></ProtectedRoute>} />
-            {/* Redirect old paths */}
-            <Route path="/consultation" element={<Navigate to="/dashboard/consultation" replace />} />
-            <Route path="/consultation/:id" element={<Navigate to="/dashboard/consultation/:id" replace />} />
-            <Route path="/patients" element={<Navigate to="/dashboard/patients" replace />} />
-            <Route path="/patients/:id" element={<Navigate to="/dashboard/patients/:id" replace />} />
-            <Route path="/history" element={<Navigate to="/dashboard/history" replace />} />
-            <Route path="/subscription" element={<Navigate to="/dashboard/subscription" replace />} />
-            <Route path="/admin" element={<Navigate to="/" replace />} />
-            <Route path="/admin/dashboard" element={<Navigate to="/" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TestingModeProvider>
+        <Routes>
+          <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+          <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsConditions />} />
+          <Route path="/refund" element={<RefundPolicy />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/dashboard/*" element={<ProtectedRoute><ProtectedApp /></ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

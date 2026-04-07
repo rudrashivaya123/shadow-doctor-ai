@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Activity, Phone, Shield, ArrowRight, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Activity, Mail, Lock, Shield, ArrowRight, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getDeviceId } from "@/lib/deviceFingerprint";
 import { useToast } from "@/hooks/use-toast";
@@ -13,31 +13,32 @@ interface TrialRegistrationModalProps {
   onSuccess: () => void;
 }
 
-type Step = "phone" | "otp" | "success";
-
 const TrialRegistrationModal = ({ open, onClose, onSuccess }: TrialRegistrationModalProps) => {
-  const [step, setStep] = useState<Step>("phone");
-  const [phone, setPhone] = useState("+91");
-  const [otp, setOtp] = useState("");
-  const [devOtp, setDevOtp] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [deviceId, setDeviceId] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
       getDeviceId().then(setDeviceId);
-      setStep("phone");
-      setOtp("");
+      setEmail("");
+      setPassword("");
       setError(null);
-      setDevOtp(null);
+      setSuccess(false);
     }
   }, [open]);
 
-  const handleSendOtp = async () => {
-    if (!/^\+\d{10,15}$/.test(phone)) {
-      setError("Enter a valid phone number (e.g., +919876543210)");
+  const handleSubmit = async () => {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Enter a valid email address");
+      return;
+    }
+    if (!password || password.length < 6) {
+      setError("Password must be at least 6 characters");
       return;
     }
 
@@ -46,44 +47,11 @@ const TrialRegistrationModal = ({ open, onClose, onSuccess }: TrialRegistrationM
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("register-trial", {
-        body: { device_id: deviceId, phone },
+        body: { device_id: deviceId, email, password },
       });
 
       if (fnError || data?.error) {
-        setError(data?.error || "Failed to send OTP. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      // In dev mode, we get the OTP back
-      if (data?.dev_otp) {
-        setDevOtp(data.dev_otp);
-      }
-
-      setStep("otp");
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (otp.length !== 6) {
-      setError("Please enter the 6-digit OTP");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("verify-trial-otp", {
-        body: { device_id: deviceId, phone, otp },
-      });
-
-      if (fnError || data?.error) {
-        setError(data?.error || "OTP verification failed. Please try again.");
+        setError(data?.error || "Failed to start trial. Please try again.");
         setLoading(false);
         return;
       }
@@ -96,7 +64,7 @@ const TrialRegistrationModal = ({ open, onClose, onSuccess }: TrialRegistrationM
         });
       }
 
-      setStep("success");
+      setSuccess(true);
       toast({
         title: "🎉 Trial Activated!",
         description: "You have full access for 3 days.",
@@ -128,23 +96,35 @@ const TrialRegistrationModal = ({ open, onClose, onSuccess }: TrialRegistrationM
         </div>
 
         <div className="p-6 space-y-5">
-          {step === "phone" && (
+          {!success ? (
             <>
               <div className="space-y-3">
                 <label className="text-sm font-medium text-foreground flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-primary" />
-                  Phone Number
+                  <Mail className="h-4 w-4 text-primary" />
+                  Email Address
                 </label>
                 <Input
-                  type="tel"
-                  placeholder="+919876543210"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  type="email"
+                  placeholder="doctor@clinic.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="h-11"
                 />
-                <p className="text-xs text-muted-foreground">
-                  We'll send a one-time verification code to this number.
-                </p>
+              </div>
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <Lock className="h-4 w-4 text-primary" />
+                  Create Password
+                </label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-11"
+                  minLength={6}
+                />
+                <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
               </div>
               {error && (
                 <div className="flex items-center gap-2 text-sm text-destructive">
@@ -154,78 +134,25 @@ const TrialRegistrationModal = ({ open, onClose, onSuccess }: TrialRegistrationM
               )}
               <Button
                 className="w-full h-11 gap-2 font-semibold"
-                onClick={handleSendOtp}
+                onClick={handleSubmit}
                 disabled={loading}
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                Send Verification Code
+                Start Free Trial
               </Button>
-            </>
-          )}
-
-          {step === "otp" && (
-            <>
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-foreground">Enter OTP</label>
-                <Input
-                  type="text"
-                  placeholder="123456"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="h-11 text-center text-xl tracking-[0.5em] font-mono"
-                  maxLength={6}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Enter the 6-digit code sent to {phone}
-                </p>
-                {devOtp && (
-                  <div className="rounded-lg bg-warning/10 border border-warning/30 p-3 text-center">
-                    <p className="text-xs text-warning font-medium">DEV MODE — OTP: <span className="font-mono text-sm">{devOtp}</span></p>
-                  </div>
-                )}
+              <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground pt-2 border-t border-border/30">
+                <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Secure</span>
+                <span>One trial per device</span>
+                <span>No spam</span>
               </div>
-              {error && (
-                <div className="flex items-center gap-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  {error}
-                </div>
-              )}
-              <Button
-                className="w-full h-11 gap-2 font-semibold"
-                onClick={handleVerifyOtp}
-                disabled={loading}
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-                Verify & Start Trial
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-sm"
-                onClick={() => { setStep("phone"); setOtp(""); setError(null); }}
-              >
-                Change phone number
-              </Button>
             </>
-          )}
-
-          {step === "success" && (
+          ) : (
             <div className="text-center py-4 space-y-3">
               <div className="h-16 w-16 rounded-full bg-success/15 flex items-center justify-center mx-auto">
                 <CheckCircle className="h-8 w-8 text-success" />
               </div>
               <h3 className="text-lg font-bold text-foreground">Trial Activated!</h3>
-              <p className="text-sm text-muted-foreground">
-                Redirecting to your dashboard...
-              </p>
-            </div>
-          )}
-
-          {/* Trust indicators */}
-          {step !== "success" && (
-            <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground pt-2 border-t border-border/30">
-              <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Secure</span>
-              <span>One trial per device</span>
-              <span>No spam</span>
+              <p className="text-sm text-muted-foreground">Redirecting to your dashboard...</p>
             </div>
           )}
         </div>
