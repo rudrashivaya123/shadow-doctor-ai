@@ -130,7 +130,7 @@ const HistoryPage = () => {
           {displayRecords.map((r) => (
             <div
               key={r.id}
-              onClick={() => navigate(`/consultation/${r.id}`)}
+              onClick={() => navigate(`/dashboard/consultation/${r.id}`)}
               className="glass-card p-3 cursor-pointer hover:border-primary/40 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
