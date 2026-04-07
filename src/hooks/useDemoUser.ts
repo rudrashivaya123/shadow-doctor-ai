@@ -9,6 +9,6 @@ export const useDemoUser = () => {
   return {
     isDemoUser,
     demoEmail: DEMO_EMAIL,
-    demoPassword: "ShadowMD#Demo2026!",
+    demoPassword: "Demo@123",
   };
 };
