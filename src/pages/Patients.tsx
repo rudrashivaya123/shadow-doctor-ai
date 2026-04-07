@@ -116,7 +116,7 @@ const Patients = () => {
           {filtered.map((p) => (
             <div
               key={p.id}
-              onClick={() => navigate(`/patients/${p.id}`)}
+              onClick={() => navigate(`/dashboard/patients/${p.id}`)}
               className="glass-card p-4 cursor-pointer hover:border-primary/40 transition-colors group"
             >
               <div className="flex items-start justify-between">
