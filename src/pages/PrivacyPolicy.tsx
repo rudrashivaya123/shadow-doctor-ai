@@ -22,12 +22,26 @@ const PrivacyPolicy = () => (
       <p className="text-sm text-muted-foreground">Last updated: April 7, 2026</p>
       <div className="prose prose-sm dark:prose-invert max-w-none space-y-4 text-muted-foreground">
         <p>ShadowMD ("we", "our", "us") respects your privacy. This Privacy Policy explains how we collect, use, and protect information when you use the ShadowMD platform.</p>
+
         <h2 className="text-lg font-semibold text-foreground">Information We Collect</h2>
-        <p>We collect information you provide directly, such as your name, email address, and clinical consultation data entered into the platform. We also collect usage data such as pages visited and features used.</p>
+        <p>We collect information you provide directly, such as your name, email address, phone number, and clinical consultation data entered into the platform. We also collect usage data such as pages visited and features used.</p>
+
         <h2 className="text-lg font-semibold text-foreground">How We Use Your Information</h2>
-        <p>We use your information to provide and improve our services, process payments, and communicate with you about your account. We do not sell your personal information to third parties.</p>
+        <p>We use your information to provide and improve our services, process payments via Razorpay, communicate with you about your account, and ensure service quality. We do not sell your personal information to third parties.</p>
+
+        <h2 className="text-lg font-semibold text-foreground">Medical Data Disclaimer</h2>
+        <p className="font-medium text-foreground">ShadowMD does not store sensitive medical data without your explicit consent.</p>
+        <p>All consultation data is encrypted and accessible only to the authenticated account holder. We do not share clinical data with third parties for marketing or advertising purposes.</p>
+
         <h2 className="text-lg font-semibold text-foreground">Data Security</h2>
-        <p>We implement appropriate security measures to protect your information. All data is encrypted in transit and at rest. However, no method of transmission over the Internet is 100% secure.</p>
+        <p>We implement industry-standard security measures including encryption in transit (TLS) and at rest, row-level security policies, and JWT-based authentication. However, no method of transmission over the Internet is 100% secure.</p>
+
+        <h2 className="text-lg font-semibold text-foreground">Third-Party Services</h2>
+        <p>We use Razorpay for payment processing. Your payment information is handled directly by Razorpay and is subject to their privacy policy. We do not store credit card or payment instrument details on our servers.</p>
+
+        <h2 className="text-lg font-semibold text-foreground">Data Retention</h2>
+        <p>We retain your account data for as long as your account is active. You may request deletion of your data by contacting us at support@shadowmd.com.</p>
+
         <h2 className="text-lg font-semibold text-foreground">Contact Us</h2>
         <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:support@shadowmd.com" className="text-primary hover:underline">support@shadowmd.com</a>.</p>
       </div>

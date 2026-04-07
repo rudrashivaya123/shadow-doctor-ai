@@ -8,6 +8,7 @@ const AppFooter = () => (
         <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
         <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms &amp; Conditions</Link>
         <Link to="/refund" className="text-muted-foreground hover:text-primary transition-colors">Refund Policy</Link>
+        <Link to="/support" className="text-muted-foreground hover:text-primary transition-colors">Support</Link>
         <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact Us</Link>
       </div>
       <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">

@@ -23,6 +23,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import RefundPolicy from "./pages/RefundPolicy";
 import ContactPage from "./pages/ContactPage";
+import SupportPage from "./pages/SupportPage";
 import NotFound from "./pages/NotFound";
 import type { Language } from "@/types/clinical";
 
@@ -32,9 +33,7 @@ const ProtectedApp = () => {
   const { isOnline, pendingCount, queue } = useOfflineSync();
   const [language, setLanguage] = useState<Language>("en");
 
-  const handleSync = useCallback(() => {
-    // Sync handled per-page
-  }, []);
+  const handleSync = useCallback(() => {}, []);
 
   return (
     <TestingModeProvider>
@@ -88,12 +87,13 @@ const App = () => (
         <Routes>
           <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
           <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-secret-shadowmd" element={<AdminLogin />} />
+          <Route path="/admin-secret-shadowmd/dashboard" element={<AdminDashboard />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/refund" element={<RefundPolicy />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/support" element={<SupportPage />} />
           <Route path="/dashboard/*" element={<ProtectedRoute><ProtectedApp /></ProtectedRoute>} />
           {/* Redirect old paths */}
           <Route path="/consultation" element={<Navigate to="/dashboard/consultation" replace />} />
@@ -102,6 +102,9 @@ const App = () => (
           <Route path="/patients/:id" element={<Navigate to="/dashboard/patients/:id" replace />} />
           <Route path="/history" element={<Navigate to="/dashboard/history" replace />} />
           <Route path="/subscription" element={<Navigate to="/dashboard/subscription" replace />} />
+          {/* Redirect old admin routes */}
+          <Route path="/admin" element={<Navigate to="/" replace />} />
+          <Route path="/admin/dashboard" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

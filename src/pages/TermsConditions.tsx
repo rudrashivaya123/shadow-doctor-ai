@@ -22,14 +22,24 @@ const TermsConditions = () => (
       <p className="text-sm text-muted-foreground">Last updated: April 7, 2026</p>
       <div className="prose prose-sm dark:prose-invert max-w-none space-y-4 text-muted-foreground">
         <p>By using ShadowMD, you agree to these Terms &amp; Conditions. Please read them carefully.</p>
+
         <h2 className="text-lg font-semibold text-foreground">Use of Service</h2>
-        <p>ShadowMD is an AI-assisted clinical decision support tool designed for licensed healthcare professionals. It does not replace professional medical judgment, diagnosis, or treatment.</p>
+        <p>ShadowMD is an AI-assisted clinical decision support tool designed for licensed healthcare professionals. It does not replace professional medical judgment, diagnosis, or treatment. All AI-generated outputs are suggestions and must be verified by a qualified medical professional before any clinical action.</p>
+
+        <h2 className="text-lg font-semibold text-foreground">Subscription &amp; Billing</h2>
+        <p>ShadowMD Pro is available at ₹1,499/month. New users receive a 3-day free trial with full access to all features. After the trial period, continued access requires an active subscription. Payments are processed securely via Razorpay.</p>
+
         <h2 className="text-lg font-semibold text-foreground">User Responsibilities</h2>
-        <p>You are responsible for the accuracy of information you provide and for all clinical decisions made using the platform. You must maintain the confidentiality of your account credentials.</p>
+        <p>You are responsible for the accuracy of information you provide and for all clinical decisions made using the platform. You must maintain the confidentiality of your account credentials and notify us immediately of any unauthorized access.</p>
+
+        <h2 className="text-lg font-semibold text-foreground">Cancellation</h2>
+        <p>You may cancel your subscription at any time by contacting support@shadowmd.com. Access will remain active until the end of your current billing period. No partial refunds are provided for unused portions of the subscription period.</p>
+
         <h2 className="text-lg font-semibold text-foreground">Limitation of Liability</h2>
-        <p>ShadowMD is provided "as is" without warranties of any kind. We are not liable for any clinical outcomes resulting from use of the platform.</p>
+        <p>ShadowMD is provided "as is" without warranties of any kind, express or implied. We are not liable for any clinical outcomes, patient harm, or professional consequences resulting from use of the platform.</p>
+
         <h2 className="text-lg font-semibold text-foreground">Changes to Terms</h2>
-        <p>We may update these terms at any time. Continued use of the platform constitutes acceptance of updated terms.</p>
+        <p>We may update these terms at any time. Continued use of the platform constitutes acceptance of updated terms. Material changes will be communicated via email.</p>
       </div>
     </main>
     <AppFooter />
