@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Activity, Stethoscope, Brain, FileText, Shield, ArrowRight } from "lucide-react";
+import { Activity, Stethoscope, Brain, FileText, ArrowRight } from "lucide-react";
+import AppFooter from "@/components/AppFooter";
 import { Button } from "@/components/ui/button";
 
 const features = [
