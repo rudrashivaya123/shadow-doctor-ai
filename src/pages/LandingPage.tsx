@@ -105,7 +105,6 @@ const LandingPage = () => {
               >
                 Start Free Trial <ArrowRight className="h-4 w-4" />
               </Button>
-              </Button>
               <Button
                 size="lg"
                 variant="outline"
