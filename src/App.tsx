@@ -17,6 +17,10 @@ import HistoryPage from "./pages/HistoryPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import Auth from "./pages/Auth";
 import LandingPage from "./pages/LandingPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
+import RefundPolicy from "./pages/RefundPolicy";
+import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import type { Language } from "@/types/clinical";
 
@@ -82,6 +86,10 @@ const App = () => (
         <Routes>
           <Route path="/" element={<AuthRoute><LandingPage /></AuthRoute>} />
           <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsConditions />} />
+          <Route path="/refund" element={<RefundPolicy />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/dashboard/*" element={<ProtectedRoute><ProtectedApp /></ProtectedRoute>} />
           {/* Redirect old paths */}
           <Route path="/consultation" element={<Navigate to="/dashboard/consultation" replace />} />
