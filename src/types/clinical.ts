@@ -2,6 +2,16 @@ export type Language = "en" | "hi" | "mr";
 
 export type Specialty = "general" | "pediatrics" | "orthopedics";
 
+export interface Patient {
+  id: string;
+  user_id: string;
+  name: string;
+  age: number | null;
+  gender: string | null;
+  phone: string | null;
+  created_at: string;
+}
+
 export interface ClinicalInput {
   symptoms: string;
   doctorNotes: string;
@@ -24,6 +34,8 @@ export interface ClinicalAnalysis {
     diagnosis: string;
     explanation: string;
   }[];
+  clinical_insights?: string[];
+  common_mistakes?: string[];
 }
 
 export interface Alert {

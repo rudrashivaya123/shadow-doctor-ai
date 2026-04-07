@@ -20,7 +20,9 @@ export type Database = {
           created_at: string
           id: string
           language: string
+          mode: string
           notes: string | null
+          patient_id: string | null
           symptoms: string
           user_id: string
         }
@@ -29,7 +31,9 @@ export type Database = {
           created_at?: string
           id?: string
           language?: string
+          mode?: string
           notes?: string | null
+          patient_id?: string | null
           symptoms: string
           user_id: string
         }
@@ -38,8 +42,48 @@ export type Database = {
           created_at?: string
           id?: string
           language?: string
+          mode?: string
           notes?: string | null
+          patient_id?: string | null
           symptoms?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          age: number | null
+          created_at: string
+          gender: string | null
+          id: string
+          name: string
+          phone: string | null
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string
+          gender?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          created_at?: string
+          gender?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
           user_id?: string
         }
         Relationships: []
