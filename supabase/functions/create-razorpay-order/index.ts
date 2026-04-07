@@ -14,6 +14,7 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
+      console.error("Missing or invalid Authorization header");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -26,27 +27,29 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("Auth error:", userError?.message || "No user found");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const userId = claimsData.claims.sub;
+    const userId = user.id;
+    console.log("Creating order for user:", userId);
+
     const RAZORPAY_KEY_ID = Deno.env.get("RAZORPAY_KEY_ID");
     const RAZORPAY_KEY_SECRET = Deno.env.get("RAZORPAY_KEY_SECRET");
 
     if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+      console.error("Razorpay keys not configured");
       return new Response(JSON.stringify({ error: "Razorpay not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Create Razorpay order
     const amountInPaise = 149900; // ₹1,499
     const orderRes = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
@@ -64,7 +67,7 @@ Deno.serve(async (req) => {
 
     if (!orderRes.ok) {
       const errText = await orderRes.text();
-      console.error("Razorpay order error:", errText);
+      console.error("Razorpay order creation failed:", errText);
       return new Response(JSON.stringify({ error: "Failed to create order" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -72,6 +75,7 @@ Deno.serve(async (req) => {
     }
 
     const order = await orderRes.json();
+    console.log("Order created:", order.id);
 
     return new Response(
       JSON.stringify({
@@ -83,7 +87,7 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("Error:", err);
+    console.error("Unhandled error:", err);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

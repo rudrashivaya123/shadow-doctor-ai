@@ -26,10 +26,13 @@ export const useRazorpay = (onSuccess?: () => void) => {
 
   const initiatePayment = useCallback(async () => {
     try {
+      console.log("[Razorpay] Creating order...");
       const { data: orderData, error } = await supabase.functions.invoke(
         "create-razorpay-order"
       );
-      if (error || !orderData?.order_id) {
+
+      if (error) {
+        console.error("[Razorpay] Order creation error:", error);
         toast({
           title: "Payment Error",
           description: "Could not initiate payment. Please try again.",
@@ -37,6 +40,18 @@ export const useRazorpay = (onSuccess?: () => void) => {
         });
         return;
       }
+
+      if (!orderData?.order_id) {
+        console.error("[Razorpay] No order_id in response:", orderData);
+        toast({
+          title: "Payment Error",
+          description: orderData?.error || "Could not initiate payment. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("[Razorpay] Order created:", orderData.order_id);
 
       const options = {
         key: orderData.key_id,
@@ -49,47 +64,83 @@ export const useRazorpay = (onSuccess?: () => void) => {
           email: user?.email || "",
         },
         handler: async (response: any) => {
-          const { data: verifyData, error: verifyError } =
-            await supabase.functions.invoke("verify-razorpay-payment", {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              },
-            });
-
-          if (verifyError || !verifyData?.success) {
-            toast({
-              title: "Verification Failed",
-              description: "Payment could not be verified. Contact support.",
-              variant: "destructive",
-            });
-            return;
-          }
+          console.log("[Razorpay] Payment response received:", {
+            order_id: response.razorpay_order_id,
+            payment_id: response.razorpay_payment_id,
+            has_signature: !!response.razorpay_signature,
+          });
 
           toast({
-            title: "🎉 Subscription Activated!",
-            description: "Your subscription is now active for 30 days.",
+            title: "Verifying payment...",
+            description: "Please wait while we confirm your payment.",
           });
-          onSuccess?.();
-          navigate("/dashboard");
+
+          try {
+            const { data: verifyData, error: verifyError } =
+              await supabase.functions.invoke("verify-razorpay-payment", {
+                body: {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                },
+              });
+
+            console.log("[Razorpay] Verification response:", verifyData, "Error:", verifyError);
+
+            if (verifyError) {
+              console.error("[Razorpay] Verification invoke error:", verifyError);
+              toast({
+                title: "Payment Verification Failed",
+                description: "Payment verification failed. Please contact support or retry.",
+                variant: "destructive",
+              });
+              return;
+            }
+
+            if (!verifyData?.success) {
+              console.error("[Razorpay] Verification failed:", verifyData);
+              toast({
+                title: "Payment Verification Failed",
+                description: verifyData?.error || "Payment verification failed. Please contact support or retry.",
+                variant: "destructive",
+              });
+              return;
+            }
+
+            console.log("[Razorpay] Payment verified successfully!");
+            toast({
+              title: "🎉 Subscription Activated!",
+              description: "Your subscription is now active for 30 days.",
+            });
+            onSuccess?.();
+            navigate("/dashboard");
+          } catch (verifyErr) {
+            console.error("[Razorpay] Verification exception:", verifyErr);
+            toast({
+              title: "Payment Verification Failed",
+              description: "Payment verification failed. Please contact support or retry.",
+              variant: "destructive",
+            });
+          }
         },
         theme: { color: "#6366f1" },
       };
 
       const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", () => {
+      rzp.on("payment.failed", (response: any) => {
+        console.error("[Razorpay] Payment failed:", response?.error);
         toast({
           title: "Payment Failed",
-          description: "Payment was not completed. Please try again.",
+          description: response?.error?.description || "Payment was not completed. Please try again.",
           variant: "destructive",
         });
       });
       rzp.open();
-    } catch {
+    } catch (err) {
+      console.error("[Razorpay] Unexpected error:", err);
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: "Payment Error",
+        description: "Something went wrong initiating payment. Please try again.",
         variant: "destructive",
       });
     }
