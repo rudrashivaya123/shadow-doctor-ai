@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import PatientForm from "@/components/PatientForm";
 import type { Patient } from "@/types/clinical";
 import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
+import { useDemoUser } from "@/hooks/useDemoUser";
 
 const FREE_PATIENT_LIMIT = 10;
 
@@ -16,6 +17,7 @@ const Patients = () => {
   const { toast } = useToast();
   const trial = useTrialStatus();
   const locked = isFeatureLocked(trial);
+  const { isDemoUser } = useDemoUser();
   const [patients, setPatients] = useState<(Patient & { last_visit?: string })[]>([]);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -49,6 +51,10 @@ const Patients = () => {
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isDemoUser) {
+      toast({ title: "Restricted", description: "Demo users cannot delete patient data.", variant: "destructive" });
+      return;
+    }
     const { error } = await supabase.from("patients").delete().eq("id", id);
     if (!error) {
       setPatients((prev) => prev.filter((p) => p.id !== id));
