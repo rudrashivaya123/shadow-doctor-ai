@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useCallback } from "react";
+import { TestingModeProvider } from "@/contexts/TestingModeContext";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
@@ -29,23 +30,25 @@ const ProtectedApp = () => {
   }, []);
 
   return (
-    <AppLayout
-      language={language}
-      onLanguageChange={setLanguage}
-      isOnline={isOnline}
-      pendingCount={pendingCount}
-      onSync={handleSync}
-    >
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/consultation" element={<NewConsultation language={language} />} />
-        <Route path="/consultation/:id" element={<ConsultationDetail />} />
-        <Route path="/patients" element={<Patients />} />
-        <Route path="/patients/:id" element={<PatientProfile />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/subscription" element={<SubscriptionPage />} />
-      </Routes>
-    </AppLayout>
+    <TestingModeProvider>
+      <AppLayout
+        language={language}
+        onLanguageChange={setLanguage}
+        isOnline={isOnline}
+        pendingCount={pendingCount}
+        onSync={handleSync}
+      >
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/consultation" element={<NewConsultation language={language} />} />
+          <Route path="/consultation/:id" element={<ConsultationDetail />} />
+          <Route path="/patients" element={<Patients />} />
+          <Route path="/patients/:id" element={<PatientProfile />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/subscription" element={<SubscriptionPage />} />
+        </Routes>
+      </AppLayout>
+    </TestingModeProvider>
   );
 };
 

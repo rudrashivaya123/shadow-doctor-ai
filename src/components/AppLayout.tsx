@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "@/components/LanguageToggle";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import TestingModePanel from "@/components/TestingModePanel";
 import type { Language } from "@/types/clinical";
 
 interface AppLayoutProps {
@@ -38,6 +39,7 @@ const AppLayout = ({ children, language, onLanguageChange, isOnline, pendingCoun
               </div>
               <div className="flex items-center gap-2">
                 <OfflineIndicator isOnline={isOnline} pendingCount={pendingCount} onSync={onSync} />
+                <TestingModePanel />
                 <LanguageToggle language={language} onChange={onLanguageChange} />
                 <Button variant="ghost" size="icon" onClick={signOut} title="Sign out">
                   <LogOut className="h-4 w-4" />
