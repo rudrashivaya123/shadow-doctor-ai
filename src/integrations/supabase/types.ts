@@ -157,6 +157,51 @@ export type Database = {
         }
         Relationships: []
       }
+      trial_devices: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          otp_code: string | null
+          otp_expires_at: string | null
+          otp_verified: boolean
+          phone: string
+          status: string
+          trial_end_date: string | null
+          trial_start_date: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          otp_verified?: boolean
+          phone: string
+          status?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          otp_verified?: boolean
+          phone?: string
+          status?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
