@@ -161,10 +161,12 @@ export type Database = {
         Row: {
           created_at: string
           device_id: string
+          email: string | null
           id: string
           otp_code: string | null
           otp_expires_at: string | null
           otp_verified: boolean
+          paid: boolean
           phone: string
           status: string
           trial_end_date: string | null
@@ -175,10 +177,12 @@ export type Database = {
         Insert: {
           created_at?: string
           device_id: string
+          email?: string | null
           id?: string
           otp_code?: string | null
           otp_expires_at?: string | null
           otp_verified?: boolean
+          paid?: boolean
           phone: string
           status?: string
           trial_end_date?: string | null
@@ -189,10 +193,12 @@ export type Database = {
         Update: {
           created_at?: string
           device_id?: string
+          email?: string | null
           id?: string
           otp_code?: string | null
           otp_expires_at?: string | null
           otp_verified?: boolean
+          paid?: boolean
           phone?: string
           status?: string
           trial_end_date?: string | null
