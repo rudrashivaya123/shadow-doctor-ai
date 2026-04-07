@@ -7,6 +7,7 @@ export interface TrialStatus {
   daysRemaining: number;
   isPremium: boolean;
   planStatus: "trial" | "active" | "expired";
+  startDate: string | null;
   expiryDate: string | null;
   loading: boolean;
 }
@@ -18,6 +19,7 @@ export const useTrialStatus = (): TrialStatus => {
     daysRemaining: 3,
     isPremium: false,
     planStatus: "trial",
+    startDate: null,
     expiryDate: null,
     loading: true,
   });
@@ -49,6 +51,7 @@ export const useTrialStatus = (): TrialStatus => {
           daysRemaining: 3,
           isPremium: false,
           planStatus: "trial",
+          startDate: null,
           expiryDate: null,
           loading: false,
         });
@@ -61,7 +64,7 @@ export const useTrialStatus = (): TrialStatus => {
       const daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 
       let planStatus = data.plan_status as "trial" | "active" | "expired";
-      if (planStatus !== "trial" && diffMs <= 0) {
+      if (diffMs <= 0) {
         planStatus = "expired";
       }
 
@@ -73,6 +76,7 @@ export const useTrialStatus = (): TrialStatus => {
         daysRemaining,
         isPremium,
         planStatus,
+        startDate: data.subscription_start_date,
         expiryDate: data.subscription_end_date,
         loading: false,
       });

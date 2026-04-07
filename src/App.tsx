@@ -13,6 +13,7 @@ import Patients from "./pages/Patients";
 import PatientProfile from "./pages/PatientProfile";
 import ConsultationDetail from "./pages/ConsultationDetail";
 import HistoryPage from "./pages/HistoryPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import type { Language } from "@/types/clinical";
@@ -42,6 +43,7 @@ const ProtectedApp = () => {
         <Route path="/patients" element={<Patients />} />
         <Route path="/patients/:id" element={<PatientProfile />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/subscription" element={<SubscriptionPage />} />
       </Routes>
     </AppLayout>
   );

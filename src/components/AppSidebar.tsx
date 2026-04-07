@@ -1,4 +1,4 @@
-import { LayoutDashboard, Stethoscope, Users, History } from "lucide-react";
+import { LayoutDashboard, Stethoscope, Users, History, CreditCard } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -18,6 +18,7 @@ const items = [
   { title: "New Consultation", url: "/consultation", icon: Stethoscope },
   { title: "Patients", url: "/patients", icon: Users },
   { title: "History", url: "/history", icon: History },
+  { title: "Subscription", url: "/subscription", icon: CreditCard },
 ];
 
 export function AppSidebar() {
