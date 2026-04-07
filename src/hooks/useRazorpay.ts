@@ -67,7 +67,7 @@ export const useRazorpay = (onSuccess?: () => void) => {
             description: "Your subscription is now active for 30 days.",
           });
           onSuccess?.();
-          navigate("/");
+          navigate("/dashboard");
         },
         theme: { color: "#6366f1" },
       };
