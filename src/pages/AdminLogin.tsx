@@ -36,7 +36,7 @@ const AdminLogin = () => {
         return;
       }
 
-      navigate("/admin/dashboard", { replace: true });
+      navigate("/admin-secret-shadowmd/dashboard", { replace: true });
     } catch (err: any) {
       toast({
         title: "Access Denied",

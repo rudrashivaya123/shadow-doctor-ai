@@ -45,7 +45,7 @@ const AdminDashboard = () => {
   // Auth guard
   useEffect(() => {
     if (!authLoading && (!user || user.email?.toLowerCase() !== ADMIN_EMAIL)) {
-      navigate("/admin", { replace: true });
+      navigate("/admin-secret-shadowmd", { replace: true });
     }
   }, [user, authLoading, navigate]);
 

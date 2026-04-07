@@ -2,12 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Activity, Brain, Stethoscope, FileText, Shield, ArrowRight,
-  CheckCircle, Star, Zap, Users, ChevronRight,
+  CheckCircle, Star, Zap, Users, ChevronRight, HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppFooter from "@/components/AppFooter";
 import CheckoutModal from "@/components/CheckoutModal";
-
 
 const features = [
   {
@@ -40,7 +39,6 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
-  // Load Razorpay script
   useEffect(() => {
     if (document.getElementById("razorpay-script")) return;
     const s = document.createElement("script");
@@ -65,14 +63,18 @@ const LandingPage = () => {
             </div>
             <span className="text-lg font-bold tracking-tight">ShadowMD</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground"
-              onClick={scrollToPricing}
-            >
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={scrollToPricing}>
               Pricing
+            </Button>
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={() => navigate("/support")}>
+              Support
+            </Button>
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={() => navigate("/contact")}>
+              Contact
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => navigate("/auth")}>
+              Login
             </Button>
           </div>
         </div>
@@ -98,20 +100,15 @@ const LandingPage = () => {
               <Button
                 size="lg"
                 className="gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 px-8 text-base font-semibold shadow-lg shadow-success/20"
-                onClick={() => navigate("/auth")}
+                onClick={() => setCheckoutOpen(true)}
               >
                 Start Free Trial <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-12 px-8 text-base"
-                onClick={scrollToPricing}
-              >
+              <Button size="lg" variant="outline" className="h-12 px-8 text-base" onClick={scrollToPricing}>
                 View Pricing
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground pt-2">3-day free trial • No credit card required</p>
+            <p className="text-xs text-muted-foreground pt-2">3-day free trial • No credit card required • No login needed</p>
           </div>
         </section>
 
@@ -164,7 +161,6 @@ const LandingPage = () => {
             </div>
 
             <div className="rounded-2xl border-2 border-primary/40 bg-card/80 overflow-hidden shadow-xl shadow-primary/5">
-              {/* Badge */}
               <div className="bg-primary/10 text-primary text-center text-sm font-semibold py-2">
                 Most Popular
               </div>
@@ -188,32 +184,13 @@ const LandingPage = () => {
                   className="w-full gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 text-base font-semibold shadow-lg shadow-success/20"
                   onClick={() => setCheckoutOpen(true)}
                 >
-                  Upgrade Now <ChevronRight className="h-4 w-4" />
+                  Start Free Trial <ChevronRight className="h-4 w-4" />
                 </Button>
                 <p className="text-xs text-center text-muted-foreground">
                   3-day free trial included • Cancel anytime
                 </p>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Trial CTA */}
-        <section className="py-12 px-4 border-t border-border/30">
-          <div className="max-w-lg mx-auto text-center space-y-3">
-            <p className="text-lg font-semibold text-foreground">
-              ✨ 3-Day Free Trial — No Credit Card Required
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Get full access to all clinical tools. Upgrade anytime.
-            </p>
-            <Button
-              size="lg"
-              className="gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 px-8 text-base font-semibold shadow-lg shadow-success/20"
-              onClick={() => navigate("/auth")}
-            >
-              Start Free Trial <ArrowRight className="h-4 w-4" />
-            </Button>
           </div>
         </section>
 
