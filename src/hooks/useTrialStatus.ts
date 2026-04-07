@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTestingMode } from "@/contexts/TestingModeContext";
@@ -26,12 +26,9 @@ const computeStatus = (data: {
 
   let planStatus = data.plan_status as "trial" | "active" | "expired";
 
-  // Active paid subscription — always allow access (even past end date until explicitly cancelled)
   const isPremium = planStatus === "active";
-  // Trial — allow access only if not expired
   const isTrialActive = planStatus === "trial" && !isExpired;
 
-  // Only mark as expired for trials that have passed
   if (isExpired && planStatus === "trial") {
     planStatus = "expired";
   }
@@ -49,7 +46,7 @@ const computeStatus = (data: {
 
 export const useTrialStatus = (): TrialStatus => {
   const { user } = useAuth();
-  const { getOverriddenStatus } = useTestingMode();
+  const { getOverriddenStatus, isTestDuration } = useTestingMode();
   const [status, setStatus] = useState<TrialStatus>({
     isTrialActive: false,
     daysRemaining: 0,
@@ -60,60 +57,65 @@ export const useTrialStatus = (): TrialStatus => {
     loading: true,
   });
 
-  useEffect(() => {
+  const fetchSubscription = useCallback(async () => {
     if (!user) return;
 
-    const fetchSubscription = async () => {
-      const { data, error } = await supabase
+    const { data, error } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Subscription fetch error:", error);
+      setStatus((s) => ({ ...s, loading: false }));
+      return;
+    }
+
+    if (!data) {
+      const { error: insertError } = await supabase.from("subscriptions").insert({
+        user_id: user.id,
+        plan_status: "trial",
+      });
+
+      if (insertError) {
+        console.error("Subscription insert error:", insertError);
+        setStatus((s) => ({ ...s, loading: false }));
+        return;
+      }
+
+      const { data: newData } = await supabase
         .from("subscriptions")
         .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (error) {
-        console.error("Subscription fetch error:", error);
+      if (newData) {
+        setStatus(computeStatus(newData));
+      } else {
         setStatus((s) => ({ ...s, loading: false }));
-        return;
       }
+      return;
+    }
 
-      if (!data) {
-        // No subscription row — create a new 3-day trial and re-fetch
-        const { error: insertError } = await supabase.from("subscriptions").insert({
-          user_id: user.id,
-          plan_status: "trial",
-        });
-
-        if (insertError) {
-          console.error("Subscription insert error:", insertError);
-          setStatus((s) => ({ ...s, loading: false }));
-          return;
-        }
-
-        // Re-fetch to get the DB-generated dates
-        const { data: newData } = await supabase
-          .from("subscriptions")
-          .select("*")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (newData) {
-          setStatus(computeStatus(newData));
-        } else {
-          setStatus((s) => ({ ...s, loading: false }));
-        }
-        return;
-      }
-
-      setStatus(computeStatus(data));
-    };
-
-    fetchSubscription();
+    setStatus(computeStatus(data));
   }, [user]);
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [fetchSubscription]);
+
+  // Auto-refresh status every 30 seconds when trial is active (useful for 2-min test mode)
+  useEffect(() => {
+    if (!status.isTrialActive) return;
+    const interval = setInterval(fetchSubscription, 30000);
+    return () => clearInterval(interval);
+  }, [status.isTrialActive, fetchSubscription]);
 
   return getOverriddenStatus(status);
 };
 
 export const isFeatureLocked = (trial: TrialStatus): boolean => {
-  if (trial.loading) return false; // Don't lock while loading
+  if (trial.loading) return false;
   return !trial.isPremium && !trial.isTrialActive;
 };
