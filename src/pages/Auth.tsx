@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const DEMO_EMAIL = "demo@shadowmd.com";
-const DEMO_PASSWORD = "Demo@123";
+const DEMO_PASSWORD = "ShadowMD#Demo2026!";
 
 const Auth = () => {
   const navigate = useNavigate();
