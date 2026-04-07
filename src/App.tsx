@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState, useCallback } from "react";
 import { TestingModeProvider } from "@/contexts/TestingModeContext";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import NewConsultation from "./pages/NewConsultation";
@@ -24,6 +25,7 @@ import TermsConditions from "./pages/TermsConditions";
 import RefundPolicy from "./pages/RefundPolicy";
 import ContactPage from "./pages/ContactPage";
 import SupportPage from "./pages/SupportPage";
+import TrialExpired from "./pages/TrialExpired";
 import NotFound from "./pages/NotFound";
 import type { Language } from "@/types/clinical";
 
@@ -32,29 +34,33 @@ const queryClient = new QueryClient();
 const ProtectedApp = () => {
   const { isOnline, pendingCount, queue } = useOfflineSync();
   const [language, setLanguage] = useState<Language>("en");
+  const trial = useTrialStatus();
 
   const handleSync = useCallback(() => {}, []);
 
+  // If trial expired and not premium, show full-screen upgrade
+  if (!trial.loading && isFeatureLocked(trial)) {
+    return <TrialExpired />;
+  }
+
   return (
-    <TestingModeProvider>
-      <AppLayout
-        language={language}
-        onLanguageChange={setLanguage}
-        isOnline={isOnline}
-        pendingCount={pendingCount}
-        onSync={handleSync}
-      >
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/consultation" element={<NewConsultation language={language} />} />
-          <Route path="/consultation/:id" element={<ConsultationDetail />} />
-          <Route path="/patients" element={<Patients />} />
-          <Route path="/patients/:id" element={<PatientProfile />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/subscription" element={<SubscriptionPage />} />
-        </Routes>
-      </AppLayout>
-    </TestingModeProvider>
+    <AppLayout
+      language={language}
+      onLanguageChange={setLanguage}
+      isOnline={isOnline}
+      pendingCount={pendingCount}
+      onSync={handleSync}
+    >
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/consultation" element={<NewConsultation language={language} />} />
+        <Route path="/consultation/:id" element={<ConsultationDetail />} />
+        <Route path="/patients" element={<Patients />} />
+        <Route path="/patients/:id" element={<PatientProfile />} />
+        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/subscription" element={<SubscriptionPage />} />
+      </Routes>
+    </AppLayout>
   );
 };
 
@@ -84,29 +90,30 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
-          <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-          <Route path="/admin-secret-shadowmd" element={<AdminLogin />} />
-          <Route path="/admin-secret-shadowmd/dashboard" element={<AdminDashboard />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<TermsConditions />} />
-          <Route path="/refund" element={<RefundPolicy />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/support" element={<SupportPage />} />
-          <Route path="/dashboard/*" element={<ProtectedRoute><ProtectedApp /></ProtectedRoute>} />
-          {/* Redirect old paths */}
-          <Route path="/consultation" element={<Navigate to="/dashboard/consultation" replace />} />
-          <Route path="/consultation/:id" element={<Navigate to="/dashboard/consultation/:id" replace />} />
-          <Route path="/patients" element={<Navigate to="/dashboard/patients" replace />} />
-          <Route path="/patients/:id" element={<Navigate to="/dashboard/patients/:id" replace />} />
-          <Route path="/history" element={<Navigate to="/dashboard/history" replace />} />
-          <Route path="/subscription" element={<Navigate to="/dashboard/subscription" replace />} />
-          {/* Redirect old admin routes */}
-          <Route path="/admin" element={<Navigate to="/" replace />} />
-          <Route path="/admin/dashboard" element={<Navigate to="/" replace />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <TestingModeProvider>
+          <Routes>
+            <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+            <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+            <Route path="/admin-secret-shadowmd" element={<AdminLogin />} />
+            <Route path="/admin-secret-shadowmd/dashboard" element={<AdminDashboard />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsConditions />} />
+            <Route path="/refund" element={<RefundPolicy />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/dashboard/*" element={<ProtectedRoute><ProtectedApp /></ProtectedRoute>} />
+            {/* Redirect old paths */}
+            <Route path="/consultation" element={<Navigate to="/dashboard/consultation" replace />} />
+            <Route path="/consultation/:id" element={<Navigate to="/dashboard/consultation/:id" replace />} />
+            <Route path="/patients" element={<Navigate to="/dashboard/patients" replace />} />
+            <Route path="/patients/:id" element={<Navigate to="/dashboard/patients/:id" replace />} />
+            <Route path="/history" element={<Navigate to="/dashboard/history" replace />} />
+            <Route path="/subscription" element={<Navigate to="/dashboard/subscription" replace />} />
+            <Route path="/admin" element={<Navigate to="/" replace />} />
+            <Route path="/admin/dashboard" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TestingModeProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
