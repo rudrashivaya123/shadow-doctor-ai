@@ -16,6 +16,7 @@ import ConsultationDetail from "./pages/ConsultationDetail";
 import HistoryPage from "./pages/HistoryPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import Auth from "./pages/Auth";
+import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 import type { Language } from "@/types/clinical";
 
@@ -68,7 +69,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
 
@@ -79,8 +80,17 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<AuthRoute><LandingPage /></AuthRoute>} />
           <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-          <Route path="/*" element={<ProtectedRoute><ProtectedApp /></ProtectedRoute>} />
+          <Route path="/dashboard/*" element={<ProtectedRoute><ProtectedApp /></ProtectedRoute>} />
+          {/* Redirect old paths */}
+          <Route path="/consultation" element={<Navigate to="/dashboard/consultation" replace />} />
+          <Route path="/consultation/:id" element={<Navigate to="/dashboard/consultation/:id" replace />} />
+          <Route path="/patients" element={<Navigate to="/dashboard/patients" replace />} />
+          <Route path="/patients/:id" element={<Navigate to="/dashboard/patients/:id" replace />} />
+          <Route path="/history" element={<Navigate to="/dashboard/history" replace />} />
+          <Route path="/subscription" element={<Navigate to="/dashboard/subscription" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
