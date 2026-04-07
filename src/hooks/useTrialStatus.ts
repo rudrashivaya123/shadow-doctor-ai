@@ -37,7 +37,6 @@ export const useTrialStatus = (): TrialStatus => {
         .maybeSingle();
 
       if (error) {
-        console.error("Subscription fetch error:", error);
         setStatus((s) => ({ ...s, loading: false }));
         return;
       }

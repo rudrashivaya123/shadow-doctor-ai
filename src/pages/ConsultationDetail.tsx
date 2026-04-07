@@ -18,7 +18,7 @@ const ConsultationDetail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       if (!id) return;
       const { data } = await supabase.from("consultations").select("*").eq("id", id).single();
       if (data) {
@@ -30,7 +30,7 @@ const ConsultationDetail = () => {
       }
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [id]);
 
   if (loading) return <div className="p-8 text-center text-muted-foreground">Loading...</div>;

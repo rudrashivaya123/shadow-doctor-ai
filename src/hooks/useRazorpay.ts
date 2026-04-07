@@ -30,7 +30,7 @@ export const useRazorpay = (onSuccess?: () => void) => {
       if (error || !orderData?.order_id) {
         toast({
           title: "Payment Error",
-          description: "Could not initiate payment. Try again.",
+          description: "Could not initiate payment. Please try again.",
           variant: "destructive",
         });
         return;
@@ -76,13 +76,12 @@ export const useRazorpay = (onSuccess?: () => void) => {
       rzp.on("payment.failed", () => {
         toast({
           title: "Payment Failed",
-          description: "Payment failed. Please try again.",
+          description: "Payment was not completed. Please try again.",
           variant: "destructive",
         });
       });
       rzp.open();
-    } catch (err) {
-      console.error("Razorpay error:", err);
+    } catch {
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
