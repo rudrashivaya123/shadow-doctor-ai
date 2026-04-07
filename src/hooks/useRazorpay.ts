@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 declare global {
   interface Window {
@@ -12,6 +13,7 @@ declare global {
 export const useRazorpay = (onSuccess?: () => void) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (document.getElementById("razorpay-script")) return;
@@ -41,8 +43,11 @@ export const useRazorpay = (onSuccess?: () => void) => {
         amount: orderData.amount,
         currency: orderData.currency,
         name: "ShadowMD",
-        description: "Premium Plan – ₹1,499/month",
+        description: "Monthly Subscription — ₹1,499/mo",
         order_id: orderData.order_id,
+        prefill: {
+          email: user?.email || "",
+        },
         handler: async (response: any) => {
           const { data: verifyData, error: verifyError } =
             await supabase.functions.invoke("verify-razorpay-payment", {
@@ -88,7 +93,7 @@ export const useRazorpay = (onSuccess?: () => void) => {
         variant: "destructive",
       });
     }
-  }, [toast, onSuccess, navigate]);
+  }, [toast, onSuccess, navigate, user]);
 
   return { initiatePayment };
 };

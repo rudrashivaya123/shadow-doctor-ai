@@ -25,20 +25,22 @@ const computeStatus = (data: {
   const isExpired = diffMs <= 0;
 
   let planStatus = data.plan_status as "trial" | "active" | "expired";
-  if (isExpired && planStatus !== "active") {
-    planStatus = "expired";
-  }
 
-  // Active paid subscription — always allow access
-  const isPremium = planStatus === "active" && !isExpired;
+  // Active paid subscription — always allow access (even past end date until explicitly cancelled)
+  const isPremium = planStatus === "active";
   // Trial — allow access only if not expired
   const isTrialActive = planStatus === "trial" && !isExpired;
+
+  // Only mark as expired for trials that have passed
+  if (isExpired && planStatus === "trial") {
+    planStatus = "expired";
+  }
 
   return {
     isTrialActive,
     daysRemaining,
     isPremium,
-    planStatus: isExpired && planStatus !== "active" ? "expired" : planStatus,
+    planStatus,
     startDate: data.subscription_start_date,
     expiryDate: data.subscription_end_date,
     loading: false,
