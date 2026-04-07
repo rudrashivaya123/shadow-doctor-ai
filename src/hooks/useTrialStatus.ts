@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useTestingMode } from "@/contexts/TestingModeContext";
 
 export interface TrialStatus {
   isTrialActive: boolean;
@@ -25,7 +24,6 @@ const computeStatus = (data: {
   const isExpired = diffMs <= 0;
 
   let planStatus = data.plan_status as "trial" | "active" | "expired";
-
   const isPremium = planStatus === "active";
   const isTrialActive = planStatus === "trial" && !isExpired;
 
@@ -46,7 +44,6 @@ const computeStatus = (data: {
 
 export const useTrialStatus = (): TrialStatus => {
   const { user } = useAuth();
-  const { getOverriddenStatus, isTestDuration } = useTestingMode();
   const [status, setStatus] = useState<TrialStatus>({
     isTrialActive: false,
     daysRemaining: 0,
@@ -105,14 +102,14 @@ export const useTrialStatus = (): TrialStatus => {
     fetchSubscription();
   }, [fetchSubscription]);
 
-  // Auto-refresh status every 30 seconds when trial is active (useful for 2-min test mode)
+  // Auto-refresh every 30 seconds when trial is active
   useEffect(() => {
     if (!status.isTrialActive) return;
     const interval = setInterval(fetchSubscription, 30000);
     return () => clearInterval(interval);
   }, [status.isTrialActive, fetchSubscription]);
 
-  return getOverriddenStatus(status);
+  return status;
 };
 
 export const isFeatureLocked = (trial: TrialStatus): boolean => {

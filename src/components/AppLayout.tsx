@@ -1,12 +1,9 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Activity, LogOut } from "lucide-react";
-import DemoModeBadge from "@/components/DemoModeBadge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "@/components/LanguageToggle";
-import OfflineIndicator from "@/components/OfflineIndicator";
-import TestingModePanel from "@/components/TestingModePanel";
 import AppFooter from "@/components/AppFooter";
 import type { Language } from "@/types/clinical";
 
@@ -19,7 +16,7 @@ interface AppLayoutProps {
   onSync: () => void;
 }
 
-const AppLayout = ({ children, language, onLanguageChange, isOnline, pendingCount, onSync }: AppLayoutProps) => {
+const AppLayout = ({ children, language, onLanguageChange }: AppLayoutProps) => {
   const { signOut } = useAuth();
 
   return (
@@ -40,9 +37,6 @@ const AppLayout = ({ children, language, onLanguageChange, isOnline, pendingCoun
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <DemoModeBadge />
-                <OfflineIndicator isOnline={isOnline} pendingCount={pendingCount} onSync={onSync} />
-                <TestingModePanel />
                 <LanguageToggle language={language} onChange={onLanguageChange} />
                 <Button variant="ghost" size="icon" onClick={signOut} title="Sign out">
                   <LogOut className="h-4 w-4" />
