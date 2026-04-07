@@ -60,16 +60,25 @@ const NewConsultation = ({ language }: Props) => {
       toast({ title: "Consent Required", description: "Please confirm patient consent before saving.", variant: "destructive" });
       return;
     }
+    if (!selectedPatient) {
+      toast({ title: "Patient Required", description: "Please select or create a patient before saving.", variant: "destructive" });
+      return;
+    }
     const { error } = await supabase.from("consultations").insert({
       user_id: user!.id,
       symptoms,
       notes,
       language,
       analysis: result as any,
-      patient_id: selectedPatient?.id || null,
+      patient_id: selectedPatient.id,
       mode,
     });
-    if (error) console.error("Failed to save:", error);
+    if (error) {
+      console.error("Failed to save:", error);
+      toast({ title: "Save Failed", description: "Could not save consultation. Please try again.", variant: "destructive" });
+    } else {
+      toast({ title: "Saved", description: `Consultation saved for ${selectedPatient.name}.` });
+    }
   };
 
   const runAnalysis = useCallback(async (symptoms: string, notes: string, offlineId?: string) => {
@@ -98,13 +107,21 @@ const NewConsultation = ({ language }: Props) => {
   }, [language, specialty, learningMode, user, selectedPatient, consent]);
 
   const handleSubmit = useCallback(async (symptoms: string, notes: string) => {
+    if (!selectedPatient) {
+      toast({ title: "Patient Required", description: "Please select or create a patient first.", variant: "destructive" });
+      return;
+    }
+    if (!consent) {
+      toast({ title: "Consent Required", description: "Please confirm patient consent.", variant: "destructive" });
+      return;
+    }
     if (!isOnline) {
       addToQueue(symptoms, notes, language, specialty);
       toast({ title: "Saved Offline", description: "Will be analyzed when back online." });
       return;
     }
     runAnalysis(symptoms, notes);
-  }, [isOnline, language, specialty, runAnalysis, addToQueue]);
+  }, [isOnline, language, specialty, runAnalysis, addToQueue, selectedPatient, consent]);
 
   const handleImageSubmit = useCallback(async (imageBase64: string, mimeType: string, context: string) => {
     setIsImageLoading(true);
