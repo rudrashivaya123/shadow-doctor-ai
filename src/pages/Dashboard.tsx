@@ -38,6 +38,7 @@ const Dashboard = () => {
   return (
     <div className="container px-4 py-4 md:py-6 space-y-6">
       <TrialBanner trial={trial} />
+      <TrialDebugInfo trial={trial} />
 
       <div className="space-y-1">
         <h2 className="text-xl font-bold text-foreground">Dashboard</h2>
