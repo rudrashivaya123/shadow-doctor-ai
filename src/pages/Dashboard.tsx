@@ -4,6 +4,7 @@ import { Stethoscope, Users, History, TrendingUp, AlertTriangle } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import TrialBanner from "@/components/TrialBanner";
+import TrialDebugInfo from "@/components/TrialDebugInfo";
 import { useTrialStatus } from "@/hooks/useTrialStatus";
 
 const Dashboard = () => {
