@@ -7,6 +7,7 @@ export interface TrialStatus {
   daysRemaining: number;
   isPremium: boolean;
   planStatus: "trial" | "active" | "expired";
+  startDate: string | null;
   expiryDate: string | null;
   loading: boolean;
 }
