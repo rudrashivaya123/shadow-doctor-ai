@@ -100,6 +100,16 @@ Deno.serve(async (req) => {
     const now = new Date();
     const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
+    // Log payment record
+    await adminClient.from("payments").insert({
+      user_id: userId,
+      amount: 149900,
+      currency: "INR",
+      status: "success",
+      razorpay_payment_id,
+      razorpay_order_id,
+    });
+
     const { error: upsertError } = await adminClient
       .from("subscriptions")
       .upsert(
