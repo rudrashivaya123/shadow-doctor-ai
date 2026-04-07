@@ -149,7 +149,6 @@ Deno.serve(async (req) => {
       userId = newUser.user!.id;
     }
 
-    const userId = newUser.user!.id;
     const now = new Date();
     const trialEnd = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // 3 days
 
