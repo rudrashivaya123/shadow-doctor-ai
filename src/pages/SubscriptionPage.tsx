@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Crown, Calendar, Clock, Shield, Stethoscope, History, BarChart3 } from "lucide-react";
+import { Crown, Calendar, Clock, Shield, Stethoscope, History, BarChart3, Receipt, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,20 +14,23 @@ const SubscriptionPage = () => {
   const { initiatePayment } = useRazorpay(() => window.location.reload());
   const { user } = useAuth();
   const [usageStats, setUsageStats] = useState({ consultations: 0, patients: 0 });
+  const [payments, setPayments] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
-    const fetchUsage = async () => {
-      const [cRes, pRes] = await Promise.all([
+    const fetchData = async () => {
+      const [cRes, pRes, payRes] = await Promise.all([
         supabase.from("consultations").select("id", { count: "exact", head: true }),
         supabase.from("patients").select("id", { count: "exact", head: true }),
+        supabase.from("payments").select("*").order("created_at", { ascending: false }).limit(20),
       ]);
       setUsageStats({
         consultations: cRes.count || 0,
         patients: pRes.count || 0,
       });
+      setPayments(payRes.data || []);
     };
-    fetchUsage();
+    fetchData();
   }, [user]);
 
   const statusConfig = {
@@ -213,6 +216,61 @@ const SubscriptionPage = () => {
               <p className="text-xs text-muted-foreground">Patients</p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Payment History */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Receipt className="h-5 w-5 text-primary" />
+            Payment History
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {payments.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No payments yet</p>
+          ) : (
+            <div className="space-y-3">
+              {payments.map((p) => (
+                <div key={p.id} className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
+                      p.status === "success" ? "bg-success/15" : "bg-destructive/15"
+                    }`}>
+                      {p.status === "success" ? (
+                        <CheckCircle className="h-4 w-4 text-success" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-destructive" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">
+                        ₹{(p.amount / 100).toLocaleString("en-IN")}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {p.razorpay_payment_id || "—"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <Badge className={`text-[10px] ${
+                      p.status === "success"
+                        ? "bg-success/20 text-success border-success/30"
+                        : "bg-destructive/20 text-destructive border-destructive/30"
+                    }`}>
+                      {p.status === "success" ? "Success" : "Failed"}
+                    </Badge>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      {new Date(p.created_at).toLocaleDateString("en-IN", {
+                        day: "numeric", month: "short", year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
