@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import AppFooter from "@/components/AppFooter";
 import CheckoutModal from "@/components/CheckoutModal";
-import { startDemoSession } from "@/hooks/useAuth";
+
 
 const features = [
   {
@@ -98,10 +98,7 @@ const LandingPage = () => {
               <Button
                 size="lg"
                 className="gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 px-8 text-base font-semibold shadow-lg shadow-success/20"
-                onClick={() => {
-                  startDemoSession();
-                  navigate("/dashboard");
-                }}
+                onClick={() => navigate("/auth")}
               >
                 Start Free Trial <ArrowRight className="h-4 w-4" />
               </Button>
@@ -201,32 +198,22 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Demo access for verification */}
+        {/* Trial CTA */}
         <section className="py-12 px-4 border-t border-border/30">
-          <div className="max-w-lg mx-auto">
-            <div className="rounded-xl border border-border/60 bg-card/60 p-6 text-center space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                Demo Access for Verification
-              </h3>
-              <div className="space-y-1">
-                <p className="text-sm text-foreground">
-                  Email: <code className="bg-muted px-2 py-0.5 rounded text-primary text-xs">demo@shadowmd.com</code>
-                </p>
-                <p className="text-sm text-foreground">
-                  Password: <code className="bg-muted px-2 py-0.5 rounded text-primary text-xs">Demo@123</code>
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  startDemoSession();
-                  navigate("/dashboard");
-                }}
-              >
-                Login as Demo User
-              </Button>
-            </div>
+          <div className="max-w-lg mx-auto text-center space-y-3">
+            <p className="text-lg font-semibold text-foreground">
+              ✨ 3-Day Free Trial — No Credit Card Required
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Get full access to all clinical tools. Upgrade anytime.
+            </p>
+            <Button
+              size="lg"
+              className="gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 px-8 text-base font-semibold shadow-lg shadow-success/20"
+              onClick={() => navigate("/auth")}
+            >
+              Start Free Trial <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
         </section>
 
