@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -10,6 +11,7 @@ declare global {
 
 export const useRazorpay = (onSuccess?: () => void) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (document.getElementById("razorpay-script")) return;
@@ -61,10 +63,11 @@ export const useRazorpay = (onSuccess?: () => void) => {
           }
 
           toast({
-            title: "🎉 Upgrade Successful!",
-            description: "You now have full premium access for 30 days.",
+            title: "🎉 Subscription Activated!",
+            description: "Your subscription is now active for 30 days.",
           });
           onSuccess?.();
+          navigate("/");
         },
         theme: { color: "#6366f1" },
       };
@@ -73,7 +76,7 @@ export const useRazorpay = (onSuccess?: () => void) => {
       rzp.on("payment.failed", () => {
         toast({
           title: "Payment Failed",
-          description: "Your payment was not completed. Please try again.",
+          description: "Payment failed. Please try again.",
           variant: "destructive",
         });
       });
@@ -86,7 +89,7 @@ export const useRazorpay = (onSuccess?: () => void) => {
         variant: "destructive",
       });
     }
-  }, [toast, onSuccess]);
+  }, [toast, onSuccess, navigate]);
 
   return { initiatePayment };
 };

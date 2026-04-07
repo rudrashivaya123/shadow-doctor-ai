@@ -4,8 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTestingMode } from "@/contexts/TestingModeContext";
 
+const isDev = import.meta.env.DEV;
+
 const TestingModePanel = () => {
   const { isTestingMode, simulatedState, setSimulatedState, toggleTestingMode } = useTestingMode();
+
+  if (!isDev) return null;
 
   if (!isTestingMode) {
     return (
