@@ -42,7 +42,7 @@ const TrialBanner = ({ trial, onUpgradeSuccess }: TrialBannerProps) => {
         <span className="text-muted-foreground">{message}</span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <Button size="sm" variant="ghost" onClick={() => navigate("/subscription")}>
+        <Button size="sm" variant="ghost" onClick={() => navigate("/dashboard/subscription")}>
           View Plan
         </Button>
         <Button size="sm" className="gap-1.5" onClick={initiatePayment}>

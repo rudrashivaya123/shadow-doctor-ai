@@ -47,7 +47,7 @@ const PatientProfile = () => {
 
   return (
     <div className="container px-4 py-4 md:py-6 space-y-4">
-      <Button variant="ghost" size="sm" onClick={() => navigate("/patients")} className="gap-1.5">
+      <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard/patients")} className="gap-1.5">
         <ArrowLeft className="h-4 w-4" /> Back to Patients
       </Button>
 
