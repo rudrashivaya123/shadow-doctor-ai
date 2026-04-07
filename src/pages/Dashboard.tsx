@@ -4,6 +4,7 @@ import { Stethoscope, Users, History, TrendingUp, AlertTriangle } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import TrialBanner from "@/components/TrialBanner";
+import TrialDebugInfo from "@/components/TrialDebugInfo";
 import { useTrialStatus } from "@/hooks/useTrialStatus";
 
 const Dashboard = () => {
@@ -37,6 +38,7 @@ const Dashboard = () => {
   return (
     <div className="container px-4 py-4 md:py-6 space-y-6">
       <TrialBanner trial={trial} />
+      <TrialDebugInfo trial={trial} />
 
       <div className="space-y-1">
         <h2 className="text-xl font-bold text-foreground">Dashboard</h2>
