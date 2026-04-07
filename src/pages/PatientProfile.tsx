@@ -85,7 +85,7 @@ const PatientProfile = () => {
             {consultations.map((c) => (
               <div
                 key={c.id}
-                onClick={() => navigate(`/consultation/${c.id}`)}
+                onClick={() => navigate(`/dashboard/consultation/${c.id}`)}
                 className="glass-card p-3 cursor-pointer hover:border-primary/40 transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
