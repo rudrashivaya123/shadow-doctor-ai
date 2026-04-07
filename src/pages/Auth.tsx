@@ -1,39 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, Mail, Lock, Loader2, Eye, Copy, Check } from "lucide-react";
+import { Activity, Mail, Lock, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { startDemoSession } from "@/hooks/useAuth";
-
-const DEMO_EMAIL = "demo@shadowmd.com";
-const DEMO_PASSWORD = "Demo@123";
-
-const CopyButton = ({ value, label }: { value: string; label: string }) => {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-  return (
-    <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs" onClick={handleCopy}>
-      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-      {copied ? "Copied" : label}
-    </Button>
-  );
-};
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [demoLoading, setDemoLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +26,7 @@ const Auth = () => {
       } else {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        toast({ title: "Account created", description: "Check your email to verify your account before signing in." });
+        toast({ title: "Account created!", description: "Check your email to verify your account, then sign in." });
         setIsLogin(true);
       }
     } catch (err: any) {
@@ -56,66 +36,21 @@ const Auth = () => {
     }
   };
 
-  const handleDemoLogin = () => {
-    setDemoLoading(true);
-    // Small delay for visual feedback
-    setTimeout(() => {
-      startDemoSession();
-      navigate("/dashboard");
-    }, 400);
-  };
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-5">
-        {/* Demo access card */}
-        <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-5 space-y-4 shadow-md">
-          <div className="flex items-center gap-2">
-            <Eye className="h-5 w-5 text-primary" />
-            <span className="text-sm font-bold text-primary">Demo Access for Payment Verification</span>
+        {/* Trial highlight */}
+        <div className="rounded-xl border border-success/30 bg-success/5 p-4 text-center space-y-1">
+          <div className="flex items-center justify-center gap-2">
+            <Sparkles className="h-4 w-4 text-success" />
+            <span className="text-sm font-semibold text-success">3-Day Free Trial — No Credit Card Required</span>
           </div>
-
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <span className="text-muted-foreground text-xs block">Email</span>
-                <p className="font-mono text-foreground text-sm truncate">{DEMO_EMAIL}</p>
-              </div>
-              <CopyButton value={DEMO_EMAIL} label="Copy Email" />
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <span className="text-muted-foreground text-xs block">Password</span>
-                <p className="font-mono text-foreground text-sm">{DEMO_PASSWORD}</p>
-              </div>
-              <CopyButton value={DEMO_PASSWORD} label="Copy Password" />
-            </div>
-          </div>
-
-          <Button
-            className="w-full gap-2 text-base font-semibold h-11"
-            onClick={handleDemoLogin}
-            disabled={demoLoading}
-          >
-            {demoLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Entering demo...
-              </>
-            ) : (
-              <>
-                <Eye className="h-4 w-4" />
-                Login as Demo User
-              </>
-            )}
-          </Button>
-
-          <p className="text-xs text-muted-foreground text-center">
-            One-click instant access &mdash; no signup required.
+          <p className="text-xs text-muted-foreground">
+            Get full access to all clinical tools. Upgrade anytime.
           </p>
         </div>
 
-        {/* Regular login card */}
+        {/* Auth card */}
         <div className="glass-card p-6 md:p-8 space-y-6">
           <div className="flex items-center gap-2.5 justify-center">
             <div className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center">
@@ -129,10 +64,10 @@ const Auth = () => {
 
           <div className="text-center">
             <h2 className="text-lg font-semibold text-foreground">
-              {isLogin ? "Welcome back" : "Create account"}
+              {isLogin ? "Welcome back" : "Start your free trial"}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {isLogin ? "Sign in to access your dashboard" : "Register to start using ShadowMD"}
+              {isLogin ? "Sign in to access your dashboard" : "Create an account to get started"}
             </p>
           </div>
 
@@ -151,8 +86,8 @@ const Auth = () => {
                 <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" required minLength={6} />
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : isLogin ? "Sign In" : "Create Account"}
+            <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : isLogin ? "Sign In" : "Create Account & Start Trial"}
             </Button>
           </form>
 
