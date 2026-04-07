@@ -74,7 +74,6 @@ const NewConsultation = ({ language }: Props) => {
       mode,
     });
     if (error) {
-      console.error("Failed to save:", error);
       toast({ title: "Save Failed", description: "Could not save consultation. Please try again.", variant: "destructive" });
     } else {
       toast({ title: "Saved", description: `Consultation saved for ${selectedPatient.name}.` });
@@ -98,9 +97,8 @@ const NewConsultation = ({ language }: Props) => {
       setAnalysis(result);
       await saveConsultation(symptoms, notes, result);
       if (offlineId) markSynced(offlineId);
-    } catch (err) {
-      console.error("Analysis failed:", err);
-      toast({ title: "Analysis Failed", description: "Could not connect to AI engine.", variant: "destructive" });
+    } catch {
+      toast({ title: "Analysis Failed", description: "Could not connect to AI engine. Please try again.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -135,9 +133,8 @@ const NewConsultation = ({ language }: Props) => {
         return;
       }
       setImageDiagnosis(data as ImageDiagnosis);
-    } catch (err) {
-      console.error("Image analysis failed:", err);
-      toast({ title: "Image Analysis Failed", description: "Could not analyze. Try again.", variant: "destructive" });
+    } catch {
+      toast({ title: "Image Analysis Failed", description: "Could not analyze image. Please try again.", variant: "destructive" });
     } finally {
       setIsImageLoading(false);
     }
@@ -159,7 +156,7 @@ const NewConsultation = ({ language }: Props) => {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Shield className="h-3.5 w-3.5 shrink-0" />
-          <span>AI-assisted decision support tool only.</span>
+          <span>AI-assisted decision support tool only. Not a replacement for clinical judgment.</span>
         </div>
         <SpecialtySelector value={specialty} onChange={setSpecialty} />
       </div>
