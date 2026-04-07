@@ -27,7 +27,7 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate("/");
+        navigate("/dashboard");
       } else {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
@@ -56,7 +56,7 @@ const Auth = () => {
         password: DEMO_PASSWORD,
       });
       if (error) throw error;
-      navigate("/");
+      navigate("/dashboard");
     } catch (err: any) {
       toast({
         title: "Demo Login Failed",
