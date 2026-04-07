@@ -56,11 +56,11 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Button onClick={() => navigate("/consultation")} className="h-auto py-4 gap-2" size="lg">
+        <Button onClick={() => navigate("/dashboard/consultation")} className="h-auto py-4 gap-2" size="lg">
           <Stethoscope className="h-5 w-5" />
           New Consultation
         </Button>
-        <Button onClick={() => navigate("/patients")} variant="outline" className="h-auto py-4 gap-2" size="lg">
+        <Button onClick={() => navigate("/dashboard/patients")} variant="outline" className="h-auto py-4 gap-2" size="lg">
           <Users className="h-5 w-5" />
           Manage Patients
         </Button>

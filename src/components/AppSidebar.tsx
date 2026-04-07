@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/sidebar";
 
 const items = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "New Consultation", url: "/consultation", icon: Stethoscope },
-  { title: "Patients", url: "/patients", icon: Users },
-  { title: "History", url: "/history", icon: History },
-  { title: "Subscription", url: "/subscription", icon: CreditCard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "New Consultation", url: "/dashboard/consultation", icon: Stethoscope },
+  { title: "Patients", url: "/dashboard/patients", icon: Users },
+  { title: "History", url: "/dashboard/history", icon: History },
+  { title: "Subscription", url: "/dashboard/subscription", icon: CreditCard },
 ];
 
 export function AppSidebar() {
@@ -38,7 +38,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
-                      end={item.url === "/"}
+                      end={item.url === "/dashboard"}
                       className="hover:bg-muted/50"
                       activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                     >
