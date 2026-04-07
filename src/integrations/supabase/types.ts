@@ -106,7 +106,7 @@ export type Database = {
           id?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
-          status?: string
+          status: string
           user_id: string
         }
         Update: {
