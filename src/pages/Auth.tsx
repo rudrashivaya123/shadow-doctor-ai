@@ -24,10 +24,15 @@ const Auth = () => {
         if (error) throw error;
         navigate("/dashboard");
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        toast({ title: "Account created!", description: "Check your email to verify your account, then sign in." });
-        setIsLogin(true);
+        if (data.session) {
+          toast({ title: "🎉 Account created!", description: "Your 3-day free trial has started." });
+          navigate("/dashboard");
+        } else {
+          toast({ title: "Account created!", description: "Please sign in to continue." });
+          setIsLogin(true);
+        }
       }
     } catch (err: any) {
       toast({ title: "Authentication Error", description: err.message || "Something went wrong", variant: "destructive" });
