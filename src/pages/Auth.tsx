@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { startDemoSession } from "@/hooks/useAuth";
 
 const DEMO_EMAIL = "demo@shadowmd.com";
 const DEMO_PASSWORD = "Demo@123";
@@ -33,7 +34,6 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
-  const [demoStatus, setDemoStatus] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,51 +56,13 @@ const Auth = () => {
     }
   };
 
-  const attemptDemoLogin = async (): Promise<boolean> => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: DEMO_EMAIL,
-      password: DEMO_PASSWORD,
-    });
-    return !error;
-  };
-
-  const handleDemoLogin = async () => {
+  const handleDemoLogin = () => {
     setDemoLoading(true);
-    setDemoStatus("Logging in...");
-    try {
-      // First attempt
-      if (await attemptDemoLogin()) {
-        setDemoStatus("Redirecting...");
-        navigate("/dashboard");
-        return;
-      }
-
-      // If failed, ensure demo user exists via edge function
-      setDemoStatus("Setting up demo access...");
-      await supabase.functions.invoke("ensure-demo-user");
-
-      // Retry login
-      setDemoStatus("Logging in...");
-      if (await attemptDemoLogin()) {
-        setDemoStatus("Redirecting...");
-        navigate("/dashboard");
-        return;
-      }
-
-      // Final failure
-      toast({
-        title: "Demo temporarily unavailable",
-        description: "Please try again in a moment.",
-      });
-    } catch {
-      toast({
-        title: "Demo temporarily unavailable",
-        description: "Please try again in a moment.",
-      });
-    } finally {
-      setDemoLoading(false);
-      setDemoStatus("");
-    }
+    // Small delay for visual feedback
+    setTimeout(() => {
+      startDemoSession();
+      navigate("/dashboard");
+    }, 400);
   };
 
   return (
@@ -138,7 +100,7 @@ const Auth = () => {
             {demoLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                {demoStatus || "Logging in..."}
+                Entering demo...
               </>
             ) : (
               <>
