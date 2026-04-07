@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Activity, Brain, Stethoscope, FileText, Shield, ArrowRight,
-  CheckCircle, Star, Zap, Users, ChevronRight, HelpCircle,
+  CheckCircle, Star, Zap, Users, ChevronRight, Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppFooter from "@/components/AppFooter";
-import CheckoutModal from "@/components/CheckoutModal";
 
 const features = [
   {
@@ -37,16 +36,6 @@ const pricingFeatures = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-
-  useEffect(() => {
-    if (document.getElementById("razorpay-script")) return;
-    const s = document.createElement("script");
-    s.id = "razorpay-script";
-    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-    s.async = true;
-    document.body.appendChild(s);
-  }, []);
 
   const scrollToPricing = () => {
     document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
@@ -100,15 +89,12 @@ const LandingPage = () => {
               <Button
                 size="lg"
                 className="gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 px-8 text-base font-semibold shadow-lg shadow-success/20"
-                onClick={() => setCheckoutOpen(true)}
+                onClick={() => navigate("/auth")}
               >
-                Start Free Trial <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline" className="h-12 px-8 text-base" onClick={scrollToPricing}>
-                View Pricing
+                Start 3-Day Free Trial — No Payment Required <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground pt-2">3-day free trial • No credit card required • No login needed</p>
+            <p className="text-xs text-muted-foreground pt-2">No credit card required • Cancel anytime • Full access for 3 days</p>
           </div>
         </section>
 
@@ -156,13 +142,13 @@ const LandingPage = () => {
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Simple, transparent pricing</h2>
               <p className="text-muted-foreground">
-                One plan. Everything included. Start with a free trial.
+                Start free. Upgrade when you're ready.
               </p>
             </div>
 
             <div className="rounded-2xl border-2 border-primary/40 bg-card/80 overflow-hidden shadow-xl shadow-primary/5">
               <div className="bg-primary/10 text-primary text-center text-sm font-semibold py-2">
-                Most Popular
+                3-Day Free Trial Included
               </div>
               <div className="p-8 space-y-6">
                 <div>
@@ -171,6 +157,7 @@ const LandingPage = () => {
                     <span className="text-5xl font-bold tracking-tight">₹1,499</span>
                     <span className="text-muted-foreground">/month</span>
                   </div>
+                  <p className="text-sm text-muted-foreground mt-1">After free trial</p>
                 </div>
                 <ul className="space-y-3">
                   {pricingFeatures.map((f) => (
@@ -182,13 +169,14 @@ const LandingPage = () => {
                 </ul>
                 <Button
                   className="w-full gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 text-base font-semibold shadow-lg shadow-success/20"
-                  onClick={() => setCheckoutOpen(true)}
+                  onClick={() => navigate("/auth")}
                 >
                   Start Free Trial <ChevronRight className="h-4 w-4" />
                 </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  3-day free trial included • Cancel anytime
-                </p>
+                <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Secure & Private</span>
+                  <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> No payment upfront</span>
+                </div>
               </div>
             </div>
           </div>
@@ -204,7 +192,6 @@ const LandingPage = () => {
       </main>
 
       <AppFooter />
-      <CheckoutModal open={checkoutOpen} onOpenChange={setCheckoutOpen} />
     </div>
   );
 };
