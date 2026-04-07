@@ -72,7 +72,7 @@ const SubscriptionPage = () => {
       </div>
 
       {/* Expiry Warning Banner */}
-      {(trial.planStatus === "expired" || (trial.daysRemaining <= 3 && trial.planStatus !== "expired")) && (
+      {(trial.planStatus === "expired" || (trial.daysRemaining <= 3)) && (
         <div className={`rounded-lg border p-4 flex items-center justify-between gap-3 ${
           trial.planStatus === "expired"
             ? "bg-destructive/10 border-destructive/30"
