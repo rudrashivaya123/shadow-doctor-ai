@@ -143,6 +143,15 @@ const NewConsultation = ({ language }: Props) => {
     }
   }, [language]);
 
+  if (locked) {
+    return (
+      <div className="container px-4 py-4 md:py-6 space-y-4">
+        <TrialBanner trial={trial} />
+        <FeatureGate featureName="New Consultation" />
+      </div>
+    );
+  }
+
   return (
     <div className="container px-4 py-4 md:py-6 space-y-4">
       <TrialBanner trial={trial} />
