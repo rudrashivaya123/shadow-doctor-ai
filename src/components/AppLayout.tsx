@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "@/components/LanguageToggle";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import TestingModePanel from "@/components/TestingModePanel";
-import MedicalDisclaimer from "@/components/MedicalDisclaimer";
+import AppFooter from "@/components/AppFooter";
 import type { Language } from "@/types/clinical";
 
 interface AppLayoutProps {
@@ -51,7 +51,7 @@ const AppLayout = ({ children, language, onLanguageChange, isOnline, pendingCoun
           <main className="flex-1 overflow-auto">
             {children}
           </main>
-          <MedicalDisclaimer />
+          <AppFooter />
         </div>
       </div>
     </SidebarProvider>

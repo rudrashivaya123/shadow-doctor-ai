@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Activity, Stethoscope, Brain, FileText, Shield, ArrowRight } from "lucide-react";
+import AppFooter from "@/components/AppFooter";
 import { Button } from "@/components/ui/button";
 
 const features = [
@@ -93,17 +94,8 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Disclaimer */}
-        <section className="py-12 px-4 border-t border-border/40 bg-card/50">
-          <div className="max-w-3xl mx-auto text-center space-y-3">
-            <Shield className="h-6 w-6 text-muted-foreground mx-auto" />
-            <p className="text-sm text-muted-foreground">
-              ShadowMD is an AI-assisted clinical support tool and does not replace
-              professional medical advice. Always verify findings with clinical assessment.
-            </p>
-          </div>
-        </section>
       </main>
+      <AppFooter />
     </div>
   );
 };
