@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stethoscope, Users, History, TrendingUp, AlertTriangle } from "lucide-react";
+import { Stethoscope, Users, History, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import TrialBanner from "@/components/TrialBanner";
-import TrialDebugInfo from "@/components/TrialDebugInfo";
 import { useTrialStatus } from "@/hooks/useTrialStatus";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const trial = useTrialStatus();
+  const { user } = useAuth();
   const [stats, setStats] = useState({ patients: 0, consultations: 0, highRisk: 0 });
 
   useEffect(() => {
@@ -38,11 +39,12 @@ const Dashboard = () => {
   return (
     <div className="container px-4 py-4 md:py-6 space-y-6">
       <TrialBanner trial={trial} />
-      <TrialDebugInfo trial={trial} />
 
       <div className="space-y-1">
-        <h2 className="text-xl font-bold text-foreground">Dashboard</h2>
-        <p className="text-sm text-muted-foreground">Overview of your clinical practice</p>
+        <h2 className="text-xl font-bold text-foreground">
+          Welcome back{user?.email ? `, Dr.` : ""}
+        </h2>
+        <p className="text-sm text-muted-foreground">Your clinical practice at a glance</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -60,7 +62,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Button onClick={() => navigate("/dashboard/consultation")} className="h-auto py-4 gap-2" size="lg">
           <Stethoscope className="h-5 w-5" />
-          New Consultation
+          Start New Consultation
         </Button>
         <Button onClick={() => navigate("/dashboard/patients")} variant="outline" className="h-auto py-4 gap-2" size="lg">
           <Users className="h-5 w-5" />
