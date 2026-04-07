@@ -15,6 +15,7 @@ export interface TrialStatus {
 
 export const useTrialStatus = (): TrialStatus => {
   const { user } = useAuth();
+  const { getOverriddenStatus } = useTestingMode();
   const [status, setStatus] = useState<TrialStatus>({
     isTrialActive: true,
     daysRemaining: 3,
@@ -42,7 +43,6 @@ export const useTrialStatus = (): TrialStatus => {
       }
 
       if (!data) {
-        // No subscription row — create a trial entry (ignore duplicate errors from race conditions)
         await supabase.from("subscriptions").insert({
           user_id: user.id,
           plan_status: "trial",
@@ -86,7 +86,7 @@ export const useTrialStatus = (): TrialStatus => {
     fetchSubscription();
   }, [user]);
 
-  return status;
+  return getOverriddenStatus(status);
 };
 
 export const isFeatureLocked = (trial: TrialStatus): boolean => {
