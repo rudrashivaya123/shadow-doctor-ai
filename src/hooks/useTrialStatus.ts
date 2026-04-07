@@ -1,18 +1,86 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface TrialStatus {
   isTrialActive: boolean;
   daysRemaining: number;
   isPremium: boolean;
+  planStatus: "trial" | "active" | "expired";
+  expiryDate: string | null;
+  loading: boolean;
 }
 
 export const useTrialStatus = (): TrialStatus => {
-  // TODO: Replace with actual subscription check from database
-  const [status] = useState<TrialStatus>({
+  const { user } = useAuth();
+  const [status, setStatus] = useState<TrialStatus>({
     isTrialActive: true,
     daysRemaining: 3,
     isPremium: false,
+    planStatus: "trial",
+    expiryDate: null,
+    loading: true,
   });
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchSubscription = async () => {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Subscription fetch error:", error);
+        setStatus((s) => ({ ...s, loading: false }));
+        return;
+      }
+
+      if (!data) {
+        // No subscription row — create a trial entry
+        const { error: insertError } = await supabase.from("subscriptions").insert({
+          user_id: user.id,
+          plan_status: "trial",
+        });
+        if (insertError) console.error("Failed to create trial:", insertError);
+        setStatus({
+          isTrialActive: true,
+          daysRemaining: 3,
+          isPremium: false,
+          planStatus: "trial",
+          expiryDate: null,
+          loading: false,
+        });
+        return;
+      }
+
+      const now = new Date();
+      const endDate = new Date(data.subscription_end_date);
+      const diffMs = endDate.getTime() - now.getTime();
+      const daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+      let planStatus = data.plan_status as "trial" | "active" | "expired";
+      if (planStatus !== "trial" && diffMs <= 0) {
+        planStatus = "expired";
+      }
+
+      const isPremium = planStatus === "active" && diffMs > 0;
+      const isTrialActive = planStatus === "trial" && diffMs > 0;
+
+      setStatus({
+        isTrialActive,
+        daysRemaining,
+        isPremium,
+        planStatus,
+        expiryDate: data.subscription_end_date,
+        loading: false,
+      });
+    };
+
+    fetchSubscription();
+  }, [user]);
 
   return status;
 };

@@ -1,11 +1,15 @@
 import { Lock, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRazorpay } from "@/hooks/useRazorpay";
 
 interface FeatureGateProps {
   featureName: string;
+  onUpgradeSuccess?: () => void;
 }
 
-const FeatureGate = ({ featureName }: FeatureGateProps) => {
+const FeatureGate = ({ featureName, onUpgradeSuccess }: FeatureGateProps) => {
+  const { initiatePayment } = useRazorpay(onUpgradeSuccess);
+
   return (
     <div className="glass-card p-8 flex items-center justify-center min-h-[300px]">
       <div className="text-center space-y-4 max-w-sm">
@@ -18,7 +22,7 @@ const FeatureGate = ({ featureName }: FeatureGateProps) => {
             Upgrade to unlock {featureName.toLowerCase()} and all advanced clinical tools.
           </p>
         </div>
-        <Button className="gap-1.5">
+        <Button className="gap-1.5" onClick={initiatePayment}>
           <Crown className="h-4 w-4" />
           Upgrade — ₹1,499/mo
         </Button>
