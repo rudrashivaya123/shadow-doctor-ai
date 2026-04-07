@@ -33,6 +33,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
+  const [demoStatus, setDemoStatus] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,16 +56,50 @@ const Auth = () => {
     }
   };
 
+  const attemptDemoLogin = async (): Promise<boolean> => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
+    });
+    return !error;
+  };
+
   const handleDemoLogin = async () => {
     setDemoLoading(true);
+    setDemoStatus("Logging in...");
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
-      if (error) throw error;
-      navigate("/dashboard");
-    } catch (err: any) {
-      toast({ title: "Demo Login Failed", description: err.message || "Could not login with demo credentials.", variant: "destructive" });
+      // First attempt
+      if (await attemptDemoLogin()) {
+        setDemoStatus("Redirecting...");
+        navigate("/dashboard");
+        return;
+      }
+
+      // If failed, ensure demo user exists via edge function
+      setDemoStatus("Setting up demo access...");
+      await supabase.functions.invoke("ensure-demo-user");
+
+      // Retry login
+      setDemoStatus("Logging in...");
+      if (await attemptDemoLogin()) {
+        setDemoStatus("Redirecting...");
+        navigate("/dashboard");
+        return;
+      }
+
+      // Final failure
+      toast({
+        title: "Demo temporarily unavailable",
+        description: "Please try again in a moment.",
+      });
+    } catch {
+      toast({
+        title: "Demo temporarily unavailable",
+        description: "Please try again in a moment.",
+      });
     } finally {
       setDemoLoading(false);
+      setDemoStatus("");
     }
   };
 
@@ -75,7 +110,7 @@ const Auth = () => {
         <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-5 space-y-4 shadow-md">
           <div className="flex items-center gap-2">
             <Eye className="h-5 w-5 text-primary" />
-            <span className="text-sm font-bold text-primary">Demo Access for Razorpay Verification</span>
+            <span className="text-sm font-bold text-primary">Demo Access for Payment Verification</span>
           </div>
 
           <div className="space-y-2.5">
@@ -95,13 +130,26 @@ const Auth = () => {
             </div>
           </div>
 
-          <Button className="w-full gap-2 text-base font-semibold h-11" onClick={handleDemoLogin} disabled={demoLoading}>
-            {demoLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
-            Login as Demo User
+          <Button
+            className="w-full gap-2 text-base font-semibold h-11"
+            onClick={handleDemoLogin}
+            disabled={demoLoading}
+          >
+            {demoLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {demoStatus || "Logging in..."}
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4" />
+                Login as Demo User
+              </>
+            )}
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">
-            Use the &ldquo;Login as Demo User&rdquo; button for instant access.
+            One-click instant access &mdash; no signup required.
           </p>
         </div>
 
