@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Activity, Brain, Stethoscope, FileText, Shield, ArrowRight,
-  CheckCircle, Star, Lock, Zap, Users, ChevronRight,
+  CheckCircle, Star, Zap, Users, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppFooter from "@/components/AppFooter";
 import CheckoutModal from "@/components/CheckoutModal";
+import { startDemoSession } from "@/hooks/useAuth";
 
 const features = [
   {
@@ -73,9 +74,6 @@ const LandingPage = () => {
             >
               Pricing
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
-              Sign In
-            </Button>
           </div>
         </div>
       </header>
@@ -100,9 +98,13 @@ const LandingPage = () => {
               <Button
                 size="lg"
                 className="gap-2 bg-success hover:bg-success/90 text-success-foreground h-12 px-8 text-base font-semibold shadow-lg shadow-success/20"
-                onClick={() => navigate("/auth")}
+                onClick={() => {
+                  startDemoSession();
+                  navigate("/dashboard");
+                }}
               >
                 Start Free Trial <ArrowRight className="h-4 w-4" />
+              </Button>
               </Button>
               <Button
                 size="lg"
@@ -215,7 +217,14 @@ const LandingPage = () => {
                   Password: <code className="bg-muted px-2 py-0.5 rounded text-primary text-xs">Demo@123</code>
                 </p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  startDemoSession();
+                  navigate("/dashboard");
+                }}
+              >
                 Login as Demo User
               </Button>
             </div>
