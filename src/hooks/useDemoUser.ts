@@ -1,10 +1,10 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, isDemoSession } from "@/hooks/useAuth";
 
 const DEMO_EMAIL = "demo@shadowmd.com";
 
 export const useDemoUser = () => {
   const { user } = useAuth();
-  const isDemoUser = user?.email === DEMO_EMAIL;
+  const isDemoUser = isDemoSession() || user?.email === DEMO_EMAIL;
 
   return {
     isDemoUser,
