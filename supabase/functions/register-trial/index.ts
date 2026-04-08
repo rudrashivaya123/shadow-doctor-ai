@@ -53,19 +53,57 @@ Deno.serve(async (req) => {
     // Check if device_id already has a verified trial
     const { data: existingDevice } = await adminClient
       .from("trial_devices")
-      .select("id, status, paid")
+      .select("id, status, paid, email")
       .eq("device_id", device_id)
       .eq("status", "active")
       .maybeSingle();
 
     if (existingDevice) {
+      // If same email is trying again on same device, treat as login (not abuse)
+      if (existingDevice.email === email) {
+        // Sign in and return existing session
+        const anonClient = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_ANON_KEY")!
+        );
+        const { data: signInData, error: signInError } = await anonClient.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError || !signInData?.session) {
+          return new Response(
+            JSON.stringify({ error: "Invalid password. Please try again." }),
+            { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const { data: existingSub } = await adminClient
+          .from("subscriptions")
+          .select("subscription_end_date")
+          .eq("user_id", signInData.user.id)
+          .maybeSingle();
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            trial_end: existingSub?.subscription_end_date,
+            session: {
+              access_token: signInData.session.access_token,
+              refresh_token: signInData.session.refresh_token,
+            },
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       return new Response(
         JSON.stringify({ error: "A free trial has already been used on this device." }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Check if email already has a trial
+    // Check if email already has a trial on a different device — let them sign in
     const { data: existingEmail } = await adminClient
       .from("trial_devices")
       .select("id, status")
