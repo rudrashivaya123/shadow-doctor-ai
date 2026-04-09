@@ -36,7 +36,7 @@ const ContactPage = () => {
         <h1 className="text-3xl font-bold">Contact Us</h1>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Mail className="h-4 w-4" />
-          <a href="mailto:support@shadowmd.com" className="text-primary hover:underline">support@shadowmd.com</a>
+          <a href="mailto:shadowmd9434@gmail.com" className="text-primary hover:underline">shadowmd9434@gmail.com</a>
         </div>
         {submitted ? (
           <div className="rounded-xl border border-primary/30 bg-primary/5 p-6 text-center space-y-2">
