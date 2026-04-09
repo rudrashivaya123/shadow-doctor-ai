@@ -40,10 +40,10 @@ const PrivacyPolicy = () => (
         <p>We use Razorpay for payment processing. Your payment information is handled directly by Razorpay and is subject to their privacy policy. We do not store credit card or payment instrument details on our servers.</p>
 
         <h2 className="text-lg font-semibold text-foreground">Data Retention</h2>
-        <p>We retain your account data for as long as your account is active. You may request deletion of your data by contacting us at support@shadowmd.com.</p>
+        <p>We retain your account data for as long as your account is active. You may request deletion of your data by contacting us at shadowmd9434@gmail.com.</p>
 
         <h2 className="text-lg font-semibold text-foreground">Contact Us</h2>
-        <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:support@shadowmd.com" className="text-primary hover:underline">support@shadowmd.com</a>.</p>
+        <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:shadowmd9434@gmail.com" className="text-primary hover:underline">shadowmd9434@gmail.com</a>.</p>
       </div>
     </main>
     <AppFooter />

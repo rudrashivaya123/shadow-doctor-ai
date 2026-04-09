@@ -33,7 +33,7 @@ const TermsConditions = () => (
         <p>You are responsible for the accuracy of information you provide and for all clinical decisions made using the platform. You must maintain the confidentiality of your account credentials and notify us immediately of any unauthorized access.</p>
 
         <h2 className="text-lg font-semibold text-foreground">Cancellation</h2>
-        <p>You may cancel your subscription at any time by contacting support@shadowmd.com. Access will remain active until the end of your current billing period. No partial refunds are provided for unused portions of the subscription period.</p>
+        <p>You may cancel your subscription at any time by contacting shadowmd9434@gmail.com. Access will remain active until the end of your current billing period. No partial refunds are provided for unused portions of the subscription period.</p>
 
         <h2 className="text-lg font-semibold text-foreground">Limitation of Liability</h2>
         <p>ShadowMD is provided "as is" without warranties of any kind, express or implied. We are not liable for any clinical outcomes, patient harm, or professional consequences resulting from use of the platform.</p>

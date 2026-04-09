@@ -68,7 +68,7 @@ const TrialExpired = () => {
         <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Secure Payment</span>
           <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> SSL Encrypted</span>
-          <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> support@shadowmd.com</span>
+          <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> shadowmd9434@gmail.com</span>
         </div>
       </div>
     </div>

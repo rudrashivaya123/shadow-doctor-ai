@@ -25,7 +25,7 @@ const faqs = [
     icon: RotateCcw,
     question: "What is the refund policy?",
     answer:
-      "All subscription payments are non-refundable once the service has been accessed or used. Refunds are only issued for duplicate transactions or technical errors that prevent service access. Requests must be made within 3–5 days of the transaction by contacting support@shadowmd.com.",
+      "All subscription payments are non-refundable once the service has been accessed or used. Refunds are only issued for duplicate transactions or technical errors that prevent service access. Requests must be made within 3–5 days of the transaction by contacting shadowmd9434@gmail.com.",
   },
   {
     icon: Shield,
@@ -37,7 +37,7 @@ const faqs = [
     icon: HelpCircle,
     question: "How do I cancel my subscription?",
     answer:
-      "You can cancel your subscription at any time by contacting us at support@shadowmd.com. Your access will remain active until the end of your current billing period. No additional charges will be made after cancellation.",
+      "You can cancel your subscription at any time by contacting us at shadowmd9434@gmail.com. Your access will remain active until the end of your current billing period. No additional charges will be made after cancellation.",
   },
   {
     icon: HelpCircle,
@@ -109,10 +109,10 @@ const SupportPage = () => (
           Reach out to our support team and we'll get back to you within 24 hours.
         </p>
         <a
-          href="mailto:support@shadowmd.com"
-          className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
-        >
-          support@shadowmd.com
+           href="mailto:shadowmd9434@gmail.com"
+           className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
+         >
+           shadowmd9434@gmail.com
         </a>
       </section>
     </main>

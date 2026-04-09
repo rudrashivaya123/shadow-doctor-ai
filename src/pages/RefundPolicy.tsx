@@ -36,7 +36,7 @@ const RefundPolicy = () => (
           <p className="mt-1">If approved, refunds will be processed within <strong className="text-foreground">7–10 business days</strong>.</p>
         </div>
         <div className="border-t border-border pt-5 space-y-3">
-          <p><span className="font-medium text-foreground">Support Email:</span>{" "}<a href="mailto:support@shadowmd.com" className="text-primary hover:underline">support@shadowmd.com</a></p>
+          <p><span className="font-medium text-foreground">Support Email:</span>{" "}<a href="mailto:shadowmd9434@gmail.com" className="text-primary hover:underline">shadowmd9434@gmail.com</a></p>
           <p className="text-sm italic">By purchasing a subscription, you agree to this refund policy.</p>
         </div>
       </div>
