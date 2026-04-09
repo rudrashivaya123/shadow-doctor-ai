@@ -16,7 +16,7 @@ const AppFooter = () => (
         <span>ShadowMD is an AI-assisted tool and does not replace professional medical advice.</span>
       </div>
       <div className="text-center text-xs text-muted-foreground space-y-1">
-        <p>Support: <a href="mailto:support@shadowmd.com" className="hover:text-primary transition-colors">support@shadowmd.com</a></p>
+        <p>Support: <a href="mailto:shadowmd9434@gmail.com" className="hover:text-primary transition-colors">shadowmd9434@gmail.com</a></p>
         <p>© 2026 ShadowMD. All rights reserved.</p>
       </div>
     </div>
