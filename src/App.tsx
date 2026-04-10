@@ -11,6 +11,7 @@ import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import NewConsultation from "./pages/NewConsultation";
+import EviSmartPage from "./pages/EviSmartPage";
 import Patients from "./pages/Patients";
 import PatientProfile from "./pages/PatientProfile";
 import ConsultationDetail from "./pages/ConsultationDetail";
@@ -51,6 +52,7 @@ const ProtectedApp = () => {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/consultation" element={<NewConsultation language={language} />} />
+        <Route path="/evismart" element={<EviSmartPage language={language} />} />
         <Route path="/consultation/:id" element={<ConsultationDetail />} />
         <Route path="/patients" element={<Patients />} />
         <Route path="/patients/:id" element={<PatientProfile />} />
