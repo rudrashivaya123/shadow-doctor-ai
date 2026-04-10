@@ -1,4 +1,4 @@
-import { LayoutDashboard, Stethoscope, Users, History, CreditCard, Zap } from "lucide-react";
+import { LayoutDashboard, Stethoscope, Users, History, CreditCard, Zap, Brain } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -17,6 +17,7 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "New Consultation", url: "/dashboard/consultation", icon: Stethoscope },
   { title: "EviSmart", url: "/dashboard/evismart", icon: Zap },
+  { title: "OPD Copilot", url: "/dashboard/copilot", icon: Brain },
   { title: "Patients", url: "/dashboard/patients", icon: Users },
   { title: "History", url: "/dashboard/history", icon: History },
   { title: "Subscription", url: "/dashboard/subscription", icon: CreditCard },
