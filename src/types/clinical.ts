@@ -50,12 +50,27 @@ export interface ImageItem {
   preview: string;
   label: string;
   note: string;
+  timestamp?: string;
+  tags?: string[];
 }
 
 export interface PerImageObservation {
   image_label: string;
   findings: string[];
   notes: string;
+  suggested_tags?: string[];
+}
+
+export type ProgressionStatus = "improving" | "worsening" | "stable" | "mixed";
+
+export interface ImageComparisonResult {
+  image_a_label: string;
+  image_b_label: string;
+  key_differences: string[];
+  size_changes: string;
+  color_texture_changes: string;
+  progression_status: ProgressionStatus;
+  clinical_significance: string;
 }
 
 export interface MultiImageDiagnosis {
@@ -77,6 +92,8 @@ export interface MultiImageDiagnosis {
   suggested_tests: string[];
   next_steps: string[];
   progression_notes?: string;
+  progression_status?: ProgressionStatus;
+  cross_image_comparison?: string[];
 }
 
 // Keep legacy single-image type for backwards compat
