@@ -43,6 +43,43 @@ export interface Alert {
   message: string;
 }
 
+export interface ImageItem {
+  id: string;
+  base64: string;
+  mimeType: string;
+  preview: string;
+  label: string;
+  note: string;
+}
+
+export interface PerImageObservation {
+  image_label: string;
+  findings: string[];
+  notes: string;
+}
+
+export interface MultiImageDiagnosis {
+  per_image_observations: PerImageObservation[];
+  combined_summary: string;
+  possible_diagnoses: {
+    name: string;
+    confidence: number;
+    description: string;
+  }[];
+  differential_diagnosis: string[];
+  key_visual_findings: string[];
+  diagnostic_criteria: {
+    matched: string[];
+    missing: string[];
+  };
+  red_flags: string[];
+  urgency_level: "Low" | "Moderate" | "HIGH RISK";
+  suggested_tests: string[];
+  next_steps: string[];
+  progression_notes?: string;
+}
+
+// Keep legacy single-image type for backwards compat
 export interface ImageDiagnosis {
   ai_summary: string;
   possible_diagnoses: {

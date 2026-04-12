@@ -19,7 +19,7 @@ import ConsentCheckbox from "@/components/ConsentCheckbox";
 import TrialBanner from "@/components/TrialBanner";
 import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
 import FeatureGate from "@/components/FeatureGate";
-import type { Language, Specialty, ClinicalAnalysis, ImageDiagnosis, Patient } from "@/types/clinical";
+import type { Language, Specialty, ClinicalAnalysis, MultiImageDiagnosis, ImageItem, Patient } from "@/types/clinical";
 
 interface Props {
   language: Language;
@@ -39,7 +39,7 @@ const NewConsultation = ({ language }: Props) => {
   const [consent, setConsent] = useState(false);
 
   const [isImageLoading, setIsImageLoading] = useState(false);
-  const [imageDiagnosis, setImageDiagnosis] = useState<ImageDiagnosis | null>(null);
+  const [imageDiagnosis, setImageDiagnosis] = useState<MultiImageDiagnosis | null>(null);
 
   const { isOnline, addToQueue, markSynced, queue } = useOfflineSync();
   const trial = useTrialStatus();
@@ -121,18 +121,28 @@ const NewConsultation = ({ language }: Props) => {
     runAnalysis(symptoms, notes);
   }, [isOnline, language, specialty, runAnalysis, addToQueue, selectedPatient, consent]);
 
-  const handleImageSubmit = useCallback(async (imageBase64: string, mimeType: string, context: string) => {
+  const handleImageSubmit = useCallback(async (images: ImageItem[], context: string) => {
     setIsImageLoading(true);
     try {
+      const payload = {
+        images: images.map(img => ({
+          base64: img.base64,
+          mimeType: img.mimeType,
+          label: img.label,
+          note: img.note,
+        })),
+        context,
+        language,
+      };
       const { data, error } = await supabase.functions.invoke("analyze-image", {
-        body: { imageBase64, mimeType, context, language },
+        body: payload,
       });
       if (error) throw new Error(error.message || "Image analysis failed");
       if (data?.error) {
         toast({ title: "Analysis Error", description: data.error, variant: "destructive" });
         return;
       }
-      setImageDiagnosis(data as ImageDiagnosis);
+      setImageDiagnosis(data as MultiImageDiagnosis);
     } catch {
       toast({ title: "Image Analysis Failed", description: "Could not analyze image. Please try again.", variant: "destructive" });
     } finally {
