@@ -19,7 +19,7 @@ import ConsentCheckbox from "@/components/ConsentCheckbox";
 import TrialBanner from "@/components/TrialBanner";
 import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
 import FeatureGate from "@/components/FeatureGate";
-import type { Language, Specialty, ClinicalAnalysis, MultiImageDiagnosis, ImageItem, Patient } from "@/types/clinical";
+import type { Language, Specialty, ClinicalAnalysis, MultiImageDiagnosis, ImageComparisonResult, ImageItem, Patient } from "@/types/clinical";
 
 interface Props {
   language: Language;
@@ -39,13 +39,14 @@ const NewConsultation = ({ language }: Props) => {
   const [consent, setConsent] = useState(false);
 
   const [isImageLoading, setIsImageLoading] = useState(false);
+  const [isComparing, setIsComparing] = useState(false);
   const [imageDiagnosis, setImageDiagnosis] = useState<MultiImageDiagnosis | null>(null);
+  const [comparisonResult, setComparisonResult] = useState<ImageComparisonResult | null>(null);
 
-  const { isOnline, addToQueue, markSynced, queue } = useOfflineSync();
+  const { isOnline, addToQueue, markSynced } = useOfflineSync();
   const trial = useTrialStatus();
   const locked = isFeatureLocked(trial);
 
-  // Preselect patient from URL param
   useEffect(() => {
     const patientId = searchParams.get("patient");
     if (patientId) {
@@ -65,16 +66,11 @@ const NewConsultation = ({ language }: Props) => {
       return;
     }
     const { error } = await supabase.from("consultations").insert({
-      user_id: user!.id,
-      symptoms,
-      notes,
-      language,
-      analysis: result as any,
-      patient_id: selectedPatient.id,
-      mode,
+      user_id: user!.id, symptoms, notes, language, analysis: result as any,
+      patient_id: selectedPatient.id, mode,
     });
     if (error) {
-      toast({ title: "Save Failed", description: "Could not save consultation. Please try again.", variant: "destructive" });
+      toast({ title: "Save Failed", description: "Could not save consultation.", variant: "destructive" });
     } else {
       toast({ title: "Saved", description: `Consultation saved for ${selectedPatient.name}.` });
     }
@@ -89,35 +85,22 @@ const NewConsultation = ({ language }: Props) => {
         body: { symptoms, notes, language, specialty, learningMode },
       });
       if (error) throw new Error(error.message || "Analysis failed");
-      if (data?.error) {
-        toast({ title: "Analysis Error", description: data.error, variant: "destructive" });
-        return;
-      }
+      if (data?.error) { toast({ title: "Analysis Error", description: data.error, variant: "destructive" }); return; }
       const result = data as ClinicalAnalysis;
       setAnalysis(result);
       await saveConsultation(symptoms, notes, result);
       if (offlineId) markSynced(offlineId);
     } catch {
-      toast({ title: "Analysis Failed", description: "Could not connect to AI engine. Please try again.", variant: "destructive" });
+      toast({ title: "Analysis Failed", description: "Could not connect to AI engine.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
   }, [language, specialty, learningMode, user, selectedPatient, consent]);
 
   const handleSubmit = useCallback(async (symptoms: string, notes: string) => {
-    if (!selectedPatient) {
-      toast({ title: "Patient Required", description: "Please select or create a patient first.", variant: "destructive" });
-      return;
-    }
-    if (!consent) {
-      toast({ title: "Consent Required", description: "Please confirm patient consent.", variant: "destructive" });
-      return;
-    }
-    if (!isOnline) {
-      addToQueue(symptoms, notes, language, specialty);
-      toast({ title: "Saved Offline", description: "Will be analyzed when back online." });
-      return;
-    }
+    if (!selectedPatient) { toast({ title: "Patient Required", description: "Please select or create a patient first.", variant: "destructive" }); return; }
+    if (!consent) { toast({ title: "Consent Required", description: "Please confirm patient consent.", variant: "destructive" }); return; }
+    if (!isOnline) { addToQueue(symptoms, notes, language, specialty); toast({ title: "Saved Offline", description: "Will be analyzed when back online." }); return; }
     runAnalysis(symptoms, notes);
   }, [isOnline, language, specialty, runAnalysis, addToQueue, selectedPatient, consent]);
 
@@ -125,28 +108,40 @@ const NewConsultation = ({ language }: Props) => {
     setIsImageLoading(true);
     try {
       const payload = {
-        images: images.map(img => ({
-          base64: img.base64,
-          mimeType: img.mimeType,
-          label: img.label,
-          note: img.note,
-        })),
-        context,
-        language,
+        mode: "analyze",
+        images: images.map(img => ({ base64: img.base64, mimeType: img.mimeType, label: img.label, note: img.note })),
+        context, language,
       };
-      const { data, error } = await supabase.functions.invoke("analyze-image", {
-        body: payload,
-      });
+      const { data, error } = await supabase.functions.invoke("analyze-image", { body: payload });
       if (error) throw new Error(error.message || "Image analysis failed");
-      if (data?.error) {
-        toast({ title: "Analysis Error", description: data.error, variant: "destructive" });
-        return;
-      }
+      if (data?.error) { toast({ title: "Analysis Error", description: data.error, variant: "destructive" }); return; }
       setImageDiagnosis(data as MultiImageDiagnosis);
     } catch {
       toast({ title: "Image Analysis Failed", description: "Could not analyze image. Please try again.", variant: "destructive" });
     } finally {
       setIsImageLoading(false);
+    }
+  }, [language]);
+
+  const handleImageCompare = useCallback(async (imageA: ImageItem, imageB: ImageItem) => {
+    setIsComparing(true);
+    try {
+      const payload = {
+        mode: "compare",
+        images: [
+          { base64: imageA.base64, mimeType: imageA.mimeType, label: imageA.label, note: imageA.note },
+          { base64: imageB.base64, mimeType: imageB.mimeType, label: imageB.label, note: imageB.note },
+        ],
+        language,
+      };
+      const { data, error } = await supabase.functions.invoke("analyze-image", { body: payload });
+      if (error) throw new Error(error.message || "Comparison failed");
+      if (data?.error) { toast({ title: "Comparison Error", description: data.error, variant: "destructive" }); return; }
+      setComparisonResult(data as ImageComparisonResult);
+    } catch {
+      toast({ title: "Comparison Failed", description: "Could not compare images. Try again.", variant: "destructive" });
+    } finally {
+      setIsComparing(false);
     }
   }, [language]);
 
@@ -162,7 +157,6 @@ const NewConsultation = ({ language }: Props) => {
   return (
     <div className="container px-4 py-4 md:py-6 space-y-4">
       <TrialBanner trial={trial} />
-
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Shield className="h-3.5 w-3.5 shrink-0" />
@@ -178,12 +172,8 @@ const NewConsultation = ({ language }: Props) => {
 
       <Tabs defaultValue="text" className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="text" className="gap-1.5">
-            <Stethoscope className="h-3.5 w-3.5" /> Symptoms
-          </TabsTrigger>
-          <TabsTrigger value="image" className="gap-1.5">
-            <ImageIcon className="h-3.5 w-3.5" /> Image Dx
-          </TabsTrigger>
+          <TabsTrigger value="text" className="gap-1.5"><Stethoscope className="h-3.5 w-3.5" /> Symptoms</TabsTrigger>
+          <TabsTrigger value="image" className="gap-1.5"><ImageIcon className="h-3.5 w-3.5" /> Image Dx</TabsTrigger>
         </TabsList>
 
         <TabsContent value="text" className="mt-4">
@@ -206,10 +196,19 @@ const NewConsultation = ({ language }: Props) => {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
               <div className="lg:col-span-2">
-                <ImageUpload onSubmit={handleImageSubmit} isLoading={isImageLoading} language={language} />
+                <ImageUpload
+                  onSubmit={handleImageSubmit}
+                  onCompare={handleImageCompare}
+                  isLoading={isImageLoading}
+                  isComparing={isComparing}
+                  language={language}
+                />
               </div>
               <div className="lg:col-span-3">
-                <ImageDiagnosisPanel diagnosis={imageDiagnosis} />
+                <ImageDiagnosisPanel
+                  diagnosis={imageDiagnosis}
+                  comparisonResult={comparisonResult}
+                />
               </div>
             </div>
           )}
