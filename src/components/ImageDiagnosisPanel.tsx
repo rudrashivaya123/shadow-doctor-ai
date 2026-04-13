@@ -1,13 +1,17 @@
-import { useState } from "react";
 import {
   Siren, CheckCircle, AlertTriangle, ShieldAlert,
   FlaskConical, ArrowRight, Eye, ClipboardCheck, Brain, XCircle,
   Image as ImageIcon, Layers, GitCompareArrows, Tag,
+  Activity, ScanSearch, ShieldCheck, Gauge,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import ProgressionBadge from "@/components/image-diagnosis/ProgressionBadge";
 import ComparisonOutput from "@/components/image-diagnosis/ComparisonOutput";
+import ImageMetaHeader from "@/components/image-diagnosis/ImageMetaHeader";
+import PerImageSection from "@/components/image-diagnosis/PerImageSection";
+import DiagnosesSection from "@/components/image-diagnosis/DiagnosesSection";
+import SelfCheckSection from "@/components/image-diagnosis/SelfCheckSection";
 import type { MultiImageDiagnosis, ImageComparisonResult } from "@/types/clinical";
 
 interface ImageDiagnosisPanelProps {
@@ -21,12 +25,6 @@ const urgencyBadge = (level: string) => {
   if (level === "Moderate")
     return <Badge className="bg-warning text-warning-foreground text-xs gap-1"><AlertTriangle className="h-3 w-3" />⚠️ Moderate</Badge>;
   return <Badge variant="secondary" className="text-xs gap-1"><CheckCircle className="h-3 w-3" />Low</Badge>;
-};
-
-const confidenceColor = (c: number) => {
-  if (c >= 70) return "text-destructive";
-  if (c >= 40) return "text-warning";
-  return "text-muted-foreground";
 };
 
 const ImageDiagnosisPanel = ({ diagnosis, comparisonResult }: ImageDiagnosisPanelProps) => {
@@ -45,30 +43,23 @@ const ImageDiagnosisPanel = ({ diagnosis, comparisonResult }: ImageDiagnosisPane
 
   return (
     <div className="space-y-4">
-      {/* Comparison Result */}
       {comparisonResult && <ComparisonOutput result={comparisonResult} />}
 
       {diagnosis && (
         <>
-          {/* Combined Summary + Urgency + Progression */}
-          <div className="glass-card p-4 space-y-3">
-            <div className="flex items-center justify-between flex-wrap gap-2">
+          {/* Image Meta: Modality, Region, Quality */}
+          <ImageMetaHeader diagnosis={diagnosis} urgencyBadge={urgencyBadge} />
+
+          {/* Pattern Recognition */}
+          {diagnosis.pattern_recognition && (
+            <div className="glass-card p-4 space-y-2">
               <div className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Combined AI Summary</h3>
+                <ScanSearch className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-foreground">Pattern Recognition</h3>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {diagnosis.progression_status && (
-                  <ProgressionBadge status={diagnosis.progression_status} />
-                )}
-                {urgencyBadge(diagnosis.urgency_level)}
-              </div>
+              <p className="text-sm text-foreground/90 leading-relaxed">{diagnosis.pattern_recognition}</p>
             </div>
-            <p className="text-sm text-foreground/90 leading-relaxed">{diagnosis.combined_summary}</p>
-            {diagnosis.progression_notes && (
-              <p className="text-xs text-primary/80 italic border-l-2 border-primary/30 pl-2">{diagnosis.progression_notes}</p>
-            )}
-          </div>
+          )}
 
           {/* Cross-Image Comparison */}
           {diagnosis.cross_image_comparison && diagnosis.cross_image_comparison.length > 0 && (
@@ -87,75 +78,11 @@ const ImageDiagnosisPanel = ({ diagnosis, comparisonResult }: ImageDiagnosisPane
             </div>
           )}
 
-          {/* Per-Image Observations with Tags */}
-          {diagnosis.per_image_observations.length > 0 && (
-            <div className="glass-card p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-foreground">Per-Image Observations</h3>
-              </div>
-              <div className="space-y-3">
-                {diagnosis.per_image_observations.map((obs, i) => (
-                  <div key={i} className="bg-muted/40 rounded-lg p-3 space-y-1.5">
-                    <div className="flex items-center justify-between flex-wrap gap-1">
-                      <p className="text-xs font-semibold text-primary">{obs.image_label}</p>
-                      {obs.suggested_tags && obs.suggested_tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {obs.suggested_tags.map((tag, j) => (
-                            <Badge key={j} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 gap-0.5">
-                              <Tag className="h-2 w-2" />{tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <ul className="space-y-1 text-sm text-foreground/80">
-                      {obs.findings.map((f, j) => (
-                        <li key={j} className="flex items-start gap-2">
-                          <span className="text-primary shrink-0 mt-0.5">→</span>{f}
-                        </li>
-                      ))}
-                    </ul>
-                    {obs.notes && <p className="text-xs text-muted-foreground italic">{obs.notes}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Per-Image Observations */}
+          <PerImageSection observations={diagnosis.per_image_observations} />
 
-          {/* Possible Diagnoses */}
-          <div className="glass-card p-4 space-y-3">
-            <h3 className="font-semibold text-foreground">Possible Diagnoses</h3>
-            <div className="space-y-3">
-              {diagnosis.possible_diagnoses.map((dx, i) => (
-                <div key={i} className="bg-muted/40 rounded-lg p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">{dx.name}</span>
-                    <span className={`text-sm font-bold ${confidenceColor(dx.confidence)}`}>{dx.confidence}%</span>
-                  </div>
-                  <Progress value={dx.confidence} className="h-1.5" />
-                  <p className="text-xs text-muted-foreground">{dx.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Differential Diagnosis */}
-          {diagnosis.differential_diagnosis.length > 0 && (
-            <div className="glass-card p-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-foreground">Differential Diagnosis</h3>
-              </div>
-              <ul className="space-y-1.5 text-sm text-foreground/80">
-                {diagnosis.differential_diagnosis.map((d, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-primary shrink-0 mt-0.5">•</span>{d}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {/* Diagnoses + Confidence */}
+          <DiagnosesSection diagnosis={diagnosis} />
 
           {/* Key Visual Findings */}
           {diagnosis.key_visual_findings.length > 0 && (
@@ -248,6 +175,16 @@ const ImageDiagnosisPanel = ({ diagnosis, comparisonResult }: ImageDiagnosisPane
               </ol>
             </div>
           )}
+
+          {/* Self-Check */}
+          {diagnosis.self_check && <SelfCheckSection selfCheck={diagnosis.self_check} />}
+
+          {/* Disclaimer */}
+          <div className="border border-muted rounded-lg p-3 bg-muted/20">
+            <p className="text-xs text-muted-foreground text-center">
+              ⚠️ This is AI-assisted analysis for clinical support only. Final diagnosis must be made by a licensed medical professional.
+            </p>
+          </div>
         </>
       )}
     </div>

@@ -73,8 +73,18 @@ export interface ImageComparisonResult {
   clinical_significance: string;
 }
 
+export interface SelfCheck {
+  could_be_wrong: string;
+  dangerous_missed_diagnosis: string;
+  adjusted_confidence?: number;
+}
+
 export interface MultiImageDiagnosis {
+  image_modality?: string;
+  anatomical_region?: string;
+  image_quality?: "Good" | "Adequate" | "Poor" | "Insufficient";
   per_image_observations: PerImageObservation[];
+  pattern_recognition?: string;
   combined_summary: string;
   possible_diagnoses: {
     name: string;
@@ -87,10 +97,12 @@ export interface MultiImageDiagnosis {
     matched: string[];
     missing: string[];
   };
+  confidence_score?: number;
   red_flags: string[];
   urgency_level: "Low" | "Moderate" | "HIGH RISK";
   suggested_tests: string[];
   next_steps: string[];
+  self_check?: SelfCheck;
   progression_notes?: string;
   progression_status?: ProgressionStatus;
   cross_image_comparison?: string[];
