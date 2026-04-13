@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "@/components/LanguageToggle";
 import AppFooter from "@/components/AppFooter";
+import TrialBanner from "@/components/TrialBanner";
+import TestingModePanel from "@/components/TestingModePanel";
+import { useTrialStatus } from "@/hooks/useTrialStatus";
 import type { Language } from "@/types/clinical";
 
 interface AppLayoutProps {
@@ -18,6 +21,7 @@ interface AppLayoutProps {
 
 const AppLayout = ({ children, language, onLanguageChange }: AppLayoutProps) => {
   const { signOut } = useAuth();
+  const trial = useTrialStatus();
 
   return (
     <SidebarProvider>
@@ -37,6 +41,8 @@ const AppLayout = ({ children, language, onLanguageChange }: AppLayoutProps) => 
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <TrialBanner trial={trial} />
+                <TestingModePanel />
                 <LanguageToggle language={language} onChange={onLanguageChange} />
                 <Button variant="ghost" size="icon" onClick={signOut} title="Sign out">
                   <LogOut className="h-4 w-4" />
