@@ -7,7 +7,7 @@ import { useTestingMode } from "@/contexts/TestingModeContext";
 import { useTrialStatus } from "@/hooks/useTrialStatus";
 import { useState } from "react";
 
-const isDev = true; // Always available for testing
+const isDev = import.meta.env.DEV;
 
 const TestingModePanel = () => {
   const {
