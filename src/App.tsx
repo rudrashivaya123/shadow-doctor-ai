@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState, useCallback } from "react";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
+import { useTestingMode } from "@/contexts/TestingModeContext";
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import NewConsultation from "./pages/NewConsultation";
@@ -34,7 +35,9 @@ const queryClient = new QueryClient();
 const ProtectedApp = () => {
   const { isOnline, pendingCount, queue } = useOfflineSync();
   const [language, setLanguage] = useState<Language>("en");
-  const trial = useTrialStatus();
+  const rawTrial = useTrialStatus();
+  const { getOverriddenStatus } = useTestingMode();
+  const trial = getOverriddenStatus(rawTrial);
 
   const handleSync = useCallback(() => {}, []);
 
