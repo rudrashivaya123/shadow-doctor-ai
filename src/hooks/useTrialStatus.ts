@@ -109,6 +109,26 @@ export const useTrialStatus = (): TrialStatus => {
     return () => clearInterval(interval);
   }, [status.isTrialActive, fetchSubscription]);
 
+  // Recheck on network reconnect
+  useEffect(() => {
+    const handleOnline = () => {
+      fetchSubscription();
+    };
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
+  }, [fetchSubscription]);
+
+  // Recheck on visibility change (tab focus)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchSubscription();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [fetchSubscription]);
+
   return status;
 };
 
