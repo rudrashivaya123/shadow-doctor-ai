@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState, useCallback } from "react";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
+import { useTrialExpiredInterceptor } from "@/hooks/useTrialExpiredInterceptor";
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import NewConsultation from "./pages/NewConsultation";
@@ -34,6 +35,7 @@ const ProtectedApp = () => {
   const { isOnline, pendingCount, queue } = useOfflineSync();
   const [language, setLanguage] = useState<Language>("en");
   const trial = useTrialStatus();
+  useTrialExpiredInterceptor();
 
   const handleSync = useCallback(() => {}, []);
 
