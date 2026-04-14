@@ -21,10 +21,6 @@ const placeholders: Record<Language, { symptoms: string; notes: string }> = {
     symptoms: "रोगी के लक्षण दर्ज करें... (जैसे, 3 दिन से बुखार, सिरदर्द)",
     notes: "डॉक्टर के नोट्स (वैकल्पिक)...",
   },
-  mr: {
-    symptoms: "रुग्णाची लक्षणे प्रविष्ट करा... (उदा., ३ दिवसांपासून ताप, डोकेदुखी)",
-    notes: "डॉक्टरांच्या नोट्स (पर्यायी)...",
-  },
 };
 
 const categoryColor: Record<string, string> = {
@@ -60,7 +56,7 @@ const ConsultationInput = ({ onSubmit, isLoading, language }: ConsultationInputP
         const SpeechRecognition =
           (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
-        recognition.lang = language === "hi" ? "hi-IN" : language === "mr" ? "mr-IN" : "en-IN";
+        recognition.lang = language === "hi" ? "hi-IN" : "en-IN";
         recognition.continuous = false;
         recognition.interimResults = false;
         recognition.onresult = (event: any) => {

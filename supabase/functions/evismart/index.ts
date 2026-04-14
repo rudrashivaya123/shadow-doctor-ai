@@ -100,7 +100,7 @@ serve(async (req) => {
     const age = body.age ? String(body.age) : "";
     const gender = body.gender ? String(body.gender) : "";
     const vitals = sanitize(body.vitals || "", 500);
-    const language = ["en", "hi", "mr"].includes(body.language) ? body.language : "en";
+    const language = ["en", "hi"].includes(body.language) ? body.language : "en";
 
     if (!symptoms) {
       return new Response(JSON.stringify({ error: "Symptoms required" }), {
@@ -112,7 +112,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("AI not configured");
 
-    const langLabel = language === "hi" ? "Hindi" : language === "mr" ? "Marathi" : "English";
+    const langLabel = language === "hi" ? "Hindi" : "English";
 
     const systemPrompt = `You are EviSmart — a rapid clinical decision support engine for Indian OPD doctors.
 You give advice like a senior consultant doing a quick curbside consult: fast, actionable, safe.

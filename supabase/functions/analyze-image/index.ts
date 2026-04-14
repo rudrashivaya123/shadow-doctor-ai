@@ -184,8 +184,8 @@ serve(async (req) => {
     const body = await req.json();
     const mode = body.mode || "analyze";
     const context = (body.context || "").trim().slice(0, MAX_CONTEXT_LENGTH);
-    const language = ["en", "hi", "mr"].includes(body.language) ? body.language : "en";
-    const langLabel = language === "hi" ? "Hindi" : language === "mr" ? "Marathi" : "English";
+    const language = ["en", "hi"].includes(body.language) ? body.language : "en";
+    const langLabel = language === "hi" ? "Hindi" : "English";
 
     let images: { base64: string; mimeType: string; label: string; note: string }[] = [];
     if (body.images && Array.isArray(body.images)) {
