@@ -24,7 +24,7 @@ const MAX_IMAGES = 5;
 const contextPlaceholders: Record<Language, string> = {
   en: "Clinical context (optional)... e.g., 45M, lesion on forearm, 2 weeks, no itching",
   hi: "नैदानिक संदर्भ (वैकल्पिक)... जैसे, 45 वर्ष पुरुष, बांह पर घाव",
-  mr: "क्लिनिकल संदर्भ (पर्यायी)... उदा., ४५ वर्षे पुरुष, हातावर जखम",
+  
 };
 
 let nextId = 1;
