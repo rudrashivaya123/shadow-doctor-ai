@@ -217,7 +217,7 @@ Doctor notes: ${notes || "None provided"}
 Language preference: ${langLabel}
 Specialty context: ${specialty}
 
-Analyze this consultation.${learningMode ? " Include learning explanations, clinical insights, and common mistakes." : ""} If the language preference is Hindi or Marathi, provide the output in that language.`;
+Analyze this consultation.${learningMode ? " Include learning explanations, clinical insights, and common mistakes." : ""} If the language preference is Hindi, provide the output in that language.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

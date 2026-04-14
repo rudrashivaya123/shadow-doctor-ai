@@ -291,7 +291,7 @@ Follow the 9-step radiologist analysis workflow strictly:
 9. Self-check: Could this be wrong? What's the most dangerous missed diagnosis?
 
 ${images.length > 1 ? "Also detect disease progression and provide cross-image comparison insights." : ""}
-If language preference is Hindi or Marathi, respond in that language.`;
+If language preference is Hindi, respond in that language.`;
 
     const contentParts: any[] = [{ type: "text", text: userPrompt }];
     for (const img of images) {
