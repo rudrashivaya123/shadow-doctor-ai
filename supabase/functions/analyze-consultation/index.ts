@@ -165,7 +165,7 @@ serve(async (req) => {
     const body = await req.json();
     const symptoms = sanitize(body.symptoms, MAX_SYMPTOMS_LENGTH);
     const notes = sanitize(body.notes || "", MAX_NOTES_LENGTH);
-    const language = ["en", "hi", "mr"].includes(body.language) ? body.language : "en";
+    const language = ["en", "hi"].includes(body.language) ? body.language : "en";
     const specialty = ["general", "pediatrics", "orthopedics"].includes(body.specialty) ? body.specialty : "general";
     const learningMode = body.learningMode === true;
 
@@ -179,7 +179,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("AI service not configured");
 
-    const langLabel = language === "hi" ? "Hindi" : language === "mr" ? "Marathi" : "English";
+    const langLabel = language === "hi" ? "Hindi" : "English";
     const specContext = specialtyContext[specialty] || specialtyContext.general;
 
     const learningInstructions = learningMode
@@ -217,7 +217,7 @@ Doctor notes: ${notes || "None provided"}
 Language preference: ${langLabel}
 Specialty context: ${specialty}
 
-Analyze this consultation.${learningMode ? " Include learning explanations, clinical insights, and common mistakes." : ""} If the language preference is Hindi or Marathi, provide the output in that language.`;
+Analyze this consultation.${learningMode ? " Include learning explanations, clinical insights, and common mistakes." : ""} If the language preference is Hindi, provide the output in that language.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

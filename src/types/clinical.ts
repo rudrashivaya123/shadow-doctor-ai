@@ -1,4 +1,4 @@
-export type Language = "en" | "hi" | "mr";
+export type Language = "en" | "hi";
 
 export type Specialty = "general" | "pediatrics" | "orthopedics";
 

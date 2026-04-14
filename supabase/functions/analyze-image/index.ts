@@ -184,8 +184,8 @@ serve(async (req) => {
     const body = await req.json();
     const mode = body.mode || "analyze";
     const context = (body.context || "").trim().slice(0, MAX_CONTEXT_LENGTH);
-    const language = ["en", "hi", "mr"].includes(body.language) ? body.language : "en";
-    const langLabel = language === "hi" ? "Hindi" : language === "mr" ? "Marathi" : "English";
+    const language = ["en", "hi"].includes(body.language) ? body.language : "en";
+    const langLabel = language === "hi" ? "Hindi" : "English";
 
     let images: { base64: string; mimeType: string; label: string; note: string }[] = [];
     if (body.images && Array.isArray(body.images)) {
@@ -291,7 +291,7 @@ Follow the 9-step radiologist analysis workflow strictly:
 9. Self-check: Could this be wrong? What's the most dangerous missed diagnosis?
 
 ${images.length > 1 ? "Also detect disease progression and provide cross-image comparison insights." : ""}
-If language preference is Hindi or Marathi, respond in that language.`;
+If language preference is Hindi, respond in that language.`;
 
     const contentParts: any[] = [{ type: "text", text: userPrompt }];
     for (const img of images) {

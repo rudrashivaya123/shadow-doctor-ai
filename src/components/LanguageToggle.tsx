@@ -9,11 +9,10 @@ interface LanguageToggleProps {
 const labels: Record<Language, string> = {
   en: "EN",
   hi: "हिं",
-  mr: "मर",
 };
 
 const LanguageToggle = ({ language, onChange }: LanguageToggleProps) => {
-  const langs: Language[] = ["en", "hi", "mr"];
+  const langs: Language[] = ["en", "hi"];
 
   return (
     <div className="flex items-center gap-1.5">
