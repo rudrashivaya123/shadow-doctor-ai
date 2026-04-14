@@ -124,6 +124,33 @@ Compare the two provided images and report:
 - Overall progression status (improving/worsening/stable/mixed)
 - Clinical significance of the changes`;
 
+async function checkSubscriptionActive(userId: string): Promise<{ allowed: boolean; reason?: string }> {
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+  const { data, error } = await admin
+    .from("subscriptions")
+    .select("plan_status, subscription_end_date")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error || !data) return { allowed: false, reason: "No subscription found" };
+  if (data.plan_status === "active") return { allowed: true };
+
+  const now = new Date();
+  const end = new Date(data.subscription_end_date);
+  if (end.getTime() <= now.getTime()) {
+    await admin
+      .from("subscriptions")
+      .update({ plan_status: "expired", updated_at: now.toISOString() })
+      .eq("user_id", userId)
+      .eq("plan_status", "trial");
+    return { allowed: false, reason: "Trial expired" };
+  }
+  return { allowed: true };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -134,6 +161,14 @@ serve(async (req) => {
     if (!user) {
       return new Response(JSON.stringify({ error: "Authentication required" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const sub = await checkSubscriptionActive(user.id);
+    if (!sub.allowed) {
+      return new Response(JSON.stringify({ error: "Your free trial has ended. Upgrade to continue.", code: "TRIAL_EXPIRED" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
