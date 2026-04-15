@@ -53,6 +53,7 @@ const LandingPage = () => {
         <LandingHero onStartTrial={openTrial} />
         <LandingSocialProof />
         <LandingFeatures />
+        <LandingTestimonials />
         <LandingPricing onStartTrial={openTrial} />
         <LandingFAQ />
 
