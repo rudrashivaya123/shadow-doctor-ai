@@ -7,6 +7,7 @@ import AppFooter from "@/components/AppFooter";
 import LandingHero from "@/components/landing/LandingHero";
 import LandingSocialProof from "@/components/landing/LandingSocialProof";
 import LandingFeatures from "@/components/landing/LandingFeatures";
+import LandingTestimonials from "@/components/landing/LandingTestimonials";
 import LandingPricing from "@/components/landing/LandingPricing";
 import LandingFAQ from "@/components/landing/LandingFAQ";
 
@@ -52,6 +53,7 @@ const LandingPage = () => {
         <LandingHero onStartTrial={openTrial} />
         <LandingSocialProof />
         <LandingFeatures />
+        <LandingTestimonials />
         <LandingPricing onStartTrial={openTrial} />
         <LandingFAQ />
 
