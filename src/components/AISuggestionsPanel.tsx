@@ -3,7 +3,6 @@ import type { ClinicalAnalysis } from "@/types/clinical";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import MultiAgentPanel from "@/components/MultiAgentPanel";
-import { Button } from "@/components/ui/button";
 
 interface AISuggestionsPanelProps {
   analysis: ClinicalAnalysis | null;
