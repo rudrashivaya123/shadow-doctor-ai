@@ -19,6 +19,27 @@ export interface ClinicalInput {
   specialty?: Specialty;
 }
 
+export interface ValidatorOutput {
+  corrections: string[];
+  missed_diagnoses: string[];
+  confidence_assessment: string;
+  validation_notes: string;
+}
+
+export interface SafetyOutput {
+  safety_alerts: string[];
+  blocked_advice: string[];
+  emergency_override: boolean;
+  emergency_override_reason: string;
+  safety_score: number;
+  disclaimer: string;
+}
+
+export interface MultiAgentMetadata {
+  validator: ValidatorOutput;
+  safety: SafetyOutput;
+}
+
 export interface ClinicalAnalysis {
   primary_diagnosis: string;
   differentials: string[];
@@ -36,6 +57,7 @@ export interface ClinicalAnalysis {
   }[];
   clinical_insights?: string[];
   common_mistakes?: string[];
+  multi_agent?: MultiAgentMetadata;
 }
 
 export interface Alert {

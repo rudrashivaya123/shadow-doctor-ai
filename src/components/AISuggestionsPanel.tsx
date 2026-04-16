@@ -2,6 +2,7 @@ import { AlertTriangle, AlertCircle, CheckCircle, Siren, Stethoscope, Brain, Fla
 import type { ClinicalAnalysis } from "@/types/clinical";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import MultiAgentPanel from "@/components/MultiAgentPanel";
 
 interface AISuggestionsPanelProps {
   analysis: ClinicalAnalysis | null;
@@ -183,6 +184,11 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
             <p className="text-sm text-foreground/80 leading-relaxed">{safe.reasoning}</p>
           </div>
         )
+      )}
+
+      {/* Multi-Agent Review Panel */}
+      {analysis.multi_agent && (
+        <MultiAgentPanel metadata={analysis.multi_agent} />
       )}
     </div>
   );
