@@ -25,6 +25,9 @@ import TermsConditions from "./pages/TermsConditions";
 import RefundPolicy from "./pages/RefundPolicy";
 import ContactPage from "./pages/ContactPage";
 import SupportPage from "./pages/SupportPage";
+import MedicalDisclaimerPage from "./pages/MedicalDisclaimerPage";
+import AIDisclaimerPage from "./pages/AIDisclaimerPage";
+import DataConsentPage from "./pages/DataConsentPage";
 import TrialExpired from "./pages/TrialExpired";
 import NotFound from "./pages/NotFound";
 import type { Language } from "@/types/clinical";
@@ -99,6 +102,9 @@ const App = () => (
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/refund" element={<RefundPolicy />} />
+          <Route path="/medical-disclaimer" element={<MedicalDisclaimerPage />} />
+          <Route path="/ai-disclaimer" element={<AIDisclaimerPage />} />
+          <Route path="/data-consent" element={<DataConsentPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/dashboard/*" element={<ProtectedRoute><ProtectedApp /></ProtectedRoute>} />
