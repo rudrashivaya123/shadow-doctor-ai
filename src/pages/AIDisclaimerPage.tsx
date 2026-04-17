@@ -26,8 +26,8 @@ const AIDisclaimerPage = () => (
       </div>
       <p className="text-sm text-muted-foreground">Last updated: April 17, 2026</p>
 
-      <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 flex gap-3 items-start">
-        <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+      <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 flex gap-3 items-start">
+        <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
         <p className="text-sm text-foreground font-medium">
           ShadowMD is powered by large language models (LLMs) and computer-vision models. AI can be wrong, biased, or outdated.
           Every suggestion must be verified by a qualified clinician before any clinical action.
