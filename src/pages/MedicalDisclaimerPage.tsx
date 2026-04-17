@@ -43,6 +43,10 @@ const MedicalDisclaimerPage = () => (
           for professional medical advice, diagnosis, or treatment. Always seek the advice of a qualified physician with any
           questions regarding a medical condition.
         </p>
+        <p>
+          ShadowMD is an educational and reference support tool. It does not provide clinical decision-making, diagnosis, or
+          treatment recommendations.
+        </p>
 
         <h2 className="text-lg font-semibold text-foreground">2. Designed for Clinicians</h2>
         <p>
@@ -50,11 +54,21 @@ const MedicalDisclaimerPage = () => (
           general consumers should not act on any suggestion shown in the platform without consulting a registered medical
           practitioner.
         </p>
+        <p>
+          ShadowMD does not generate prescriptions or final treatment decisions. All outputs must be independently verified by
+          a licensed medical practitioner before any clinical action.
+        </p>
 
         <h2 className="text-lg font-semibold text-foreground">3. No Doctor–Patient Relationship</h2>
         <p>
           Use of ShadowMD does not create a doctor–patient relationship between you and ShadowMD, its founders, or its
           employees. We do not practise medicine. We provide a software tool.
+        </p>
+
+        <h2 className="text-lg font-semibold text-foreground">4. Limitation of Liability</h2>
+        <p>
+          ShadowMD and its founders, operators, and affiliates shall not be liable for any clinical decisions, outcomes,
+          adverse events, or damages arising directly or indirectly from the use of this platform.
         </p>
 
         <h2 className="text-lg font-semibold text-foreground">4. Emergency Situations</h2>
