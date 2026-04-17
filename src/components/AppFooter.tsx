@@ -4,10 +4,13 @@ import { Shield } from "lucide-react";
 const AppFooter = () => (
   <footer className="border-t border-border/40 bg-card/30 px-4 py-6">
     <div className="max-w-5xl mx-auto space-y-4">
-      <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
+      <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm">
         <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
-        <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms &amp; Conditions</Link>
+        <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
         <Link to="/refund" className="text-muted-foreground hover:text-primary transition-colors">Refund Policy</Link>
+        <Link to="/medical-disclaimer" className="text-muted-foreground hover:text-primary transition-colors">Medical Disclaimer</Link>
+        <Link to="/ai-disclaimer" className="text-muted-foreground hover:text-primary transition-colors">AI Disclaimer</Link>
+        <Link to="/data-consent" className="text-muted-foreground hover:text-primary transition-colors">Data Consent</Link>
         <Link to="/support" className="text-muted-foreground hover:text-primary transition-colors">Support</Link>
         <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact Us</Link>
       </div>
