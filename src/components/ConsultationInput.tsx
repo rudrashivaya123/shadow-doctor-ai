@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mic, MicOff, Send, Loader2 } from "lucide-react";
+import { Mic, MicOff, Send, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ interface ConsultationInputProps {
   onSubmit: (symptoms: string, notes: string) => void;
   isLoading: boolean;
   language: Language;
+  onReset?: () => void;
 }
 
 const placeholders: Record<Language, { symptoms: string; notes: string }> = {
@@ -54,7 +55,7 @@ const categoryColor: Record<string, string> = {
   test: "bg-success/20 text-success border-success/30",
 };
 
-const ConsultationInput = ({ onSubmit, isLoading, language }: ConsultationInputProps) => {
+const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: ConsultationInputProps) => {
   const [symptoms, setSymptoms] = useState("");
   const [notes, setNotes] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -64,6 +65,13 @@ const ConsultationInput = ({ onSubmit, isLoading, language }: ConsultationInputP
   const handleSubmit = () => {
     if (!symptoms.trim()) return;
     onSubmit(symptoms, notes);
+  };
+
+  const handleReset = () => {
+    setSymptoms("");
+    setNotes("");
+    setIsRecording(false);
+    onReset?.();
   };
 
   const applySuggestion = (text: string) => {
@@ -104,14 +112,26 @@ const ConsultationInput = ({ onSubmit, isLoading, language }: ConsultationInputP
     <div className="glass-card p-4 md:p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">Patient Input</h2>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleRecording}
-          className={isRecording ? "border-destructive text-destructive animate-pulse-slow" : ""}
-        >
-          {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleReset}
+            disabled={isLoading || (!symptoms && !notes)}
+            title="Reset"
+            aria-label="Reset inputs"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleRecording}
+            className={isRecording ? "border-destructive text-destructive animate-pulse-slow" : ""}
+          >
+            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </Button>
+        </div>
       </div>
 
       {isRecording && (

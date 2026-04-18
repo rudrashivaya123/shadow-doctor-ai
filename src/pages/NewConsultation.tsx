@@ -179,7 +179,16 @@ const NewConsultation = ({ language }: Props) => {
         <TabsContent value="text" className="mt-4">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             <div className="lg:col-span-2 space-y-4">
-              <ConsultationInput onSubmit={handleSubmit} isLoading={isLoading} language={language} />
+              <ConsultationInput
+                onSubmit={handleSubmit}
+                isLoading={isLoading}
+                language={language}
+                onReset={() => {
+                  setAnalysis(null);
+                  setLastSymptoms("");
+                  setLastNotes("");
+                }}
+              />
               {analysis && <RiskScoreBadge score={analysis.risk_score} level={analysis.emergency_level} />}
               <LearningMode enabled={learningMode} onToggle={setLearningMode} analysis={analysis} />
               {analysis && <ConsultationSummary symptoms={lastSymptoms} notes={lastNotes} analysis={analysis} />}

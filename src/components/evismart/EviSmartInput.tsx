@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Zap, User, Activity } from "lucide-react";
+import { Zap, User, Activity, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface Props {
   onSubmit: (data: { symptoms: string; age?: string; gender?: string; vitals?: string }) => void;
   isLoading: boolean;
+  onReset?: () => void;
 }
 
-const EviSmartInput = ({ onSubmit, isLoading }: Props) => {
+const EviSmartInput = ({ onSubmit, isLoading, onReset }: Props) => {
   const [symptoms, setSymptoms] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
@@ -22,6 +23,17 @@ const EviSmartInput = ({ onSubmit, isLoading }: Props) => {
     if (!symptoms.trim()) return;
     onSubmit({ symptoms: symptoms.trim(), age: age || undefined, gender: gender || undefined, vitals: vitals || undefined });
   };
+
+  const handleReset = () => {
+    setSymptoms("");
+    setAge("");
+    setGender("");
+    setVitals("");
+    setShowOptional(false);
+    onReset?.();
+  };
+
+  const hasAny = symptoms || age || gender || vitals;
 
   return (
     <form onSubmit={handleSubmit} className="glass-card p-4 space-y-3">
@@ -95,10 +107,23 @@ const EviSmartInput = ({ onSubmit, isLoading }: Props) => {
         </div>
       )}
 
-      <Button type="submit" disabled={isLoading || !symptoms.trim()} className="w-full gap-2">
-        <Zap className="h-4 w-4" />
-        {isLoading ? "Analyzing…" : "Get EviSmart Advice"}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isLoading || !symptoms.trim()} className="flex-1 gap-2">
+          <Zap className="h-4 w-4" />
+          {isLoading ? "Analyzing…" : "Get EviSmart Advice"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={handleReset}
+          disabled={isLoading || !hasAny}
+          title="Reset"
+          aria-label="Reset inputs"
+        >
+          <RotateCcw className="h-4 w-4" />
+        </Button>
+      </div>
     </form>
   );
 };
