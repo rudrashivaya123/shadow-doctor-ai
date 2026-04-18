@@ -100,7 +100,7 @@ serve(async (req) => {
     const age = body.age ? String(body.age) : "";
     const gender = body.gender ? String(body.gender) : "";
     const vitals = sanitize(body.vitals || "", 500);
-    const language = ["en", "hi"].includes(body.language) ? body.language : "en";
+    const language = ["en", "hi", "ta", "te", "bn", "mr"].includes(body.language) ? body.language : "en";
 
     if (!symptoms) {
       return new Response(JSON.stringify({ error: "Symptoms required" }), {
@@ -112,7 +112,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("AI not configured");
 
-    const langLabel = language === "hi" ? "Hindi" : "English";
+    const langLabelMap: Record<string, string> = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", bn: "Bengali", mr: "Marathi" };
+    const langLabel = langLabelMap[language] || "English";
 
     const systemPrompt = `You are EviSmart — a rapid evidence-based clinical decision support engine for Indian OPD doctors, trained on EBM, standard textbooks (Harrison's, Davidson's), and guidelines (WHO, NICE, ICMR).
 
