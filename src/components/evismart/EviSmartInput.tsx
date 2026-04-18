@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import VoiceDictationButton from "@/components/VoiceDictationButton";
 
 interface Props {
   onSubmit: (data: { symptoms: string; age?: string; gender?: string; vitals?: string }) => void;
@@ -47,13 +48,25 @@ const EviSmartInput = ({ onSubmit, isLoading, onReset }: Props) => {
         </div>
       </div>
 
-      <Textarea
-        placeholder="Type symptoms... (Hinglish OK) e.g. 'bukhar 3 din, dry cough, no appetite'"
-        value={symptoms}
-        onChange={(e) => setSymptoms(e.target.value)}
-        className="min-h-[70px] text-sm resize-none"
-        maxLength={2000}
-      />
+      <div className="relative">
+        <Textarea
+          placeholder="Type symptoms... (Hinglish OK) e.g. 'bukhar 3 din, dry cough, no appetite'"
+          value={symptoms}
+          onChange={(e) => setSymptoms(e.target.value)}
+          className="min-h-[70px] text-sm resize-none pr-12"
+          maxLength={2000}
+        />
+        <div className="absolute top-2 right-2">
+          <VoiceDictationButton
+            language="en"
+            size="sm"
+            disabled={isLoading}
+            onCommit={(t) =>
+              setSymptoms((prev) => (prev ? prev.replace(/\s+$/, "") + " " + t : t))
+            }
+          />
+        </div>
+      </div>
 
       {!showOptional && (
         <button
