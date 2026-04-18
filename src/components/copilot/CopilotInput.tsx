@@ -3,14 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronDown, ChevronUp, Loader2, Brain } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Brain, RotateCcw } from "lucide-react";
 
 interface Props {
   onSubmit: (data: { symptoms: string; age?: string; gender?: string; temp?: string; spo2?: string }) => void;
   isLoading: boolean;
+  onReset?: () => void;
 }
 
-const CopilotInput = ({ onSubmit, isLoading }: Props) => {
+const CopilotInput = ({ onSubmit, isLoading, onReset }: Props) => {
   const [symptoms, setSymptoms] = useState("");
   const [showOptional, setShowOptional] = useState(false);
   const [age, setAge] = useState("");
@@ -29,6 +30,18 @@ const CopilotInput = ({ onSubmit, isLoading }: Props) => {
       ...(spo2 && { spo2 }),
     });
   };
+
+  const handleReset = () => {
+    setSymptoms("");
+    setAge("");
+    setGender("");
+    setTemp("");
+    setSpo2("");
+    setShowOptional(false);
+    onReset?.();
+  };
+
+  const hasAny = symptoms || age || gender || temp || spo2;
 
   return (
     <Card className="border-primary/20">
@@ -70,16 +83,30 @@ const CopilotInput = ({ onSubmit, isLoading }: Props) => {
             </div>
           )}
 
-          <Button type="submit" disabled={isLoading || !symptoms.trim()} className="w-full h-9 text-sm">
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Analyzing…
-              </>
-            ) : (
-              "Run Copilot"
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={isLoading || !symptoms.trim()} className="flex-1 h-9 text-sm">
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Analyzing…
+                </>
+              ) : (
+                "Run Copilot"
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-9 w-9"
+              onClick={handleReset}
+              disabled={isLoading || !hasAny}
+              title="Reset"
+              aria-label="Reset inputs"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
