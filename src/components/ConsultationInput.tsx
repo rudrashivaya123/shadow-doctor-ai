@@ -21,6 +21,31 @@ const placeholders: Record<Language, { symptoms: string; notes: string }> = {
     symptoms: "रोगी के लक्षण दर्ज करें... (जैसे, 3 दिन से बुखार, सिरदर्द)",
     notes: "डॉक्टर के नोट्स (वैकल्पिक)...",
   },
+  ta: {
+    symptoms: "நோயாளியின் அறிகுறிகளை உள்ளிடவும்... (எ.கா., 3 நாட்கள் காய்ச்சல், தலைவலி)",
+    notes: "மருத்துவரின் குறிப்புகள் (விருப்பம்)...",
+  },
+  te: {
+    symptoms: "రోగి లక్షణాలను నమోదు చేయండి... (ఉదా., 3 రోజులుగా జ్వరం, తలనొప్పి)",
+    notes: "డాక్టర్ గమనికలు (ఐచ్ఛికం)...",
+  },
+  bn: {
+    symptoms: "রোগীর উপসর্গ লিখুন... (যেমন, ৩ দিন ধরে জ্বর, মাথাব্যথা)",
+    notes: "ডাক্তারের নোট (ঐচ্ছিক)...",
+  },
+  mr: {
+    symptoms: "रुग्णाची लक्षणे प्रविष्ट करा... (उदा., 3 दिवसांपासून ताप, डोकेदुखी)",
+    notes: "डॉक्टरांच्या नोंदी (पर्यायी)...",
+  },
+};
+
+const speechLocale: Record<Language, string> = {
+  en: "en-IN",
+  hi: "hi-IN",
+  ta: "ta-IN",
+  te: "te-IN",
+  bn: "bn-IN",
+  mr: "mr-IN",
 };
 
 const categoryColor: Record<string, string> = {
@@ -56,7 +81,7 @@ const ConsultationInput = ({ onSubmit, isLoading, language }: ConsultationInputP
         const SpeechRecognition =
           (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
-        recognition.lang = language === "hi" ? "hi-IN" : "en-IN";
+        recognition.lang = speechLocale[language] || "en-IN";
         recognition.continuous = false;
         recognition.interimResults = false;
         recognition.onresult = (event: any) => {
