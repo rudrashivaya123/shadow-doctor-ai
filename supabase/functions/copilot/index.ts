@@ -101,7 +101,7 @@ serve(async (req) => {
     const gender = body.gender ? String(body.gender) : "";
     const temp = body.temp ? String(body.temp) : "";
     const spo2 = body.spo2 ? String(body.spo2) : "";
-    const language = ["en", "hi"].includes(body.language) ? body.language : "en";
+    const language = ["en", "hi", "ta", "te", "bn", "mr"].includes(body.language) ? body.language : "en";
 
     if (!symptoms) {
       return new Response(JSON.stringify({ error: "Symptoms required" }), {
@@ -113,7 +113,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("AI not configured");
 
-    const langLabel = language === "hi" ? "Hindi" : "English";
+    const langLabelMap: Record<string, string> = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", bn: "Bengali", mr: "Marathi" };
+    const langLabel = langLabelMap[language] || "English";
 
     const systemPrompt = `You are the Autonomous OPD Copilot for ShadowMD — a structured clinical reasoning system trained on EBM, standard textbooks (Harrison's, Davidson's), and guidelines (WHO, NICE, ICMR).
 
