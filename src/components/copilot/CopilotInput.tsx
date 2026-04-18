@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, Loader2, Brain, RotateCcw } from "lucide-react";
+import VoiceDictationButton from "@/components/VoiceDictationButton";
 
 interface Props {
   onSubmit: (data: { symptoms: string; age?: string; gender?: string; temp?: string; spo2?: string }) => void;
@@ -57,13 +58,25 @@ const CopilotInput = ({ onSubmit, isLoading, onReset }: Props) => {
             </div>
           </div>
 
-          <Textarea
-            value={symptoms}
-            onChange={(e) => setSymptoms(e.target.value)}
-            placeholder="e.g. fever 3 din se, cough, diabetic"
-            className="min-h-[80px] text-sm resize-none"
-            maxLength={2000}
-          />
+          <div className="relative">
+            <Textarea
+              value={symptoms}
+              onChange={(e) => setSymptoms(e.target.value)}
+              placeholder="e.g. fever 3 din se, cough, diabetic"
+              className="min-h-[80px] text-sm resize-none pr-12"
+              maxLength={2000}
+            />
+            <div className="absolute top-2 right-2">
+              <VoiceDictationButton
+                language="en"
+                size="sm"
+                disabled={isLoading}
+                onCommit={(t) =>
+                  setSymptoms((prev) => (prev ? prev.replace(/\s+$/, "") + " " + t : t))
+                }
+              />
+            </div>
+          </div>
 
           <button
             type="button"
