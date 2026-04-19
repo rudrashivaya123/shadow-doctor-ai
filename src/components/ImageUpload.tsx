@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ImageTimeline from "@/components/image-diagnosis/ImageTimeline";
 import ImageSideBySide from "@/components/image-diagnosis/ImageSideBySide";
-import VoiceDictationButton from "@/components/VoiceDictationButton";
 import type { Language, ImageItem } from "@/types/clinical";
 
 interface ImageUploadProps {
@@ -249,20 +248,7 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
                     />
                     <div className="p-2 space-y-1.5">
                       <Input value={img.label} onChange={(e) => updateLabel(img.id, e.target.value)} className="h-7 text-xs bg-background/50 border-border/40" placeholder="Label" />
-                      <div className="relative">
-                        <Input value={img.note} onChange={(e) => updateNote(img.id, e.target.value)} className="h-7 text-xs bg-background/50 border-border/40 pr-8" placeholder="Note (optional)" />
-                        <div className="absolute top-0 right-0">
-                          <VoiceDictationButton
-                            language={language}
-                            size="sm"
-                            showInterim={false}
-                            className="[&>button]:h-7 [&>button]:w-7"
-                            onCommit={(t) =>
-                              updateNote(img.id, (img.note ? img.note.replace(/\s+$/, "") + " " : "") + t)
-                            }
-                          />
-                        </div>
-                      </div>
+                      <Input value={img.note} onChange={(e) => updateNote(img.id, e.target.value)} className="h-7 text-xs bg-background/50 border-border/40" placeholder="Note (optional)" />
                     </div>
                   </div>
                 );
@@ -334,22 +320,12 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
       />
 
       {/* Context */}
-      <div className="relative">
-        <Textarea
-          placeholder={contextPlaceholders[language]}
-          value={context}
-          onChange={(e) => setContext(e.target.value)}
-          className="min-h-[60px] bg-muted/50 border-border/60 resize-none pr-12"
-        />
-        <div className="absolute top-2 right-2">
-          <VoiceDictationButton
-            language={language}
-            size="sm"
-            disabled={isLoading}
-            onCommit={(t) => setContext((prev) => (prev ? prev.replace(/\s+$/, "") + " " + t : t))}
-          />
-        </div>
-      </div>
+      <Textarea
+        placeholder={contextPlaceholders[language]}
+        value={context}
+        onChange={(e) => setContext(e.target.value)}
+        className="min-h-[60px] bg-muted/50 border-border/60 resize-none"
+      />
 
       {/* Analyze */}
       <Button onClick={handleSubmit} disabled={images.length === 0 || isLoading} className="w-full gap-2">

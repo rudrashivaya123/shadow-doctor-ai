@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Send, Loader2, RotateCcw } from "lucide-react";
+import { Mic, MicOff, Send, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useTypingSuggestions } from "@/hooks/useTypingSuggestions";
-import VoiceDictationButton from "@/components/VoiceDictationButton";
 import type { Language } from "@/types/clinical";
 
 interface ConsultationInputProps {
@@ -41,6 +40,15 @@ const placeholders: Record<Language, { symptoms: string; notes: string }> = {
   },
 };
 
+const speechLocale: Record<Language, string> = {
+  en: "en-IN",
+  hi: "hi-IN",
+  ta: "ta-IN",
+  te: "te-IN",
+  bn: "bn-IN",
+  mr: "mr-IN",
+};
+
 const categoryColor: Record<string, string> = {
   symptom: "bg-primary/20 text-primary border-primary/30",
   condition: "bg-warning/20 text-warning border-warning/30",
@@ -50,6 +58,7 @@ const categoryColor: Record<string, string> = {
 const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: ConsultationInputProps) => {
   const [symptoms, setSymptoms] = useState("");
   const [notes, setNotes] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
 
   const suggestions = useTypingSuggestions(symptoms);
 
@@ -61,6 +70,7 @@ const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: Consultat
   const handleReset = () => {
     setSymptoms("");
     setNotes("");
+    setIsRecording(false);
     onReset?.();
   };
 
@@ -70,11 +80,29 @@ const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: Consultat
     setSymptoms(words.join(", ") + ", ");
   };
 
-  const appendDictation = (target: "symptoms" | "notes", text: string) => {
-    if (target === "symptoms") {
-      setSymptoms((prev) => (prev ? prev.replace(/\s+$/, "") + " " + text : text));
+  const toggleRecording = () => {
+    if (isRecording) {
+      setIsRecording(false);
     } else {
-      setNotes((prev) => (prev ? prev.replace(/\s+$/, "") + " " + text : text));
+      setIsRecording(true);
+      if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+        const SpeechRecognition =
+          (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = speechLocale[language] || "en-IN";
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setSymptoms((prev) => (prev ? prev + " " + transcript : transcript));
+          setIsRecording(false);
+        };
+        recognition.onerror = () => setIsRecording(false);
+        recognition.onend = () => setIsRecording(false);
+        recognition.start();
+      } else {
+        setTimeout(() => setIsRecording(false), 2000);
+      }
     }
   };
 
@@ -95,13 +123,23 @@ const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: Consultat
           >
             <RotateCcw className="h-4 w-4" />
           </Button>
-          <VoiceDictationButton
-            language={language}
-            onCommit={(t) => appendDictation("symptoms", t)}
-            disabled={isLoading}
-          />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleRecording}
+            className={isRecording ? "border-destructive text-destructive animate-pulse-slow" : ""}
+          >
+            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
+
+      {isRecording && (
+        <div className="flex items-center gap-2 text-sm text-destructive">
+          <span className="h-2 w-2 rounded-full bg-destructive animate-pulse-slow" />
+          Listening...
+        </div>
+      )}
 
       <div className="relative">
         <Textarea
@@ -126,23 +164,12 @@ const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: Consultat
         )}
       </div>
 
-      <div className="relative">
-        <Textarea
-          placeholder={ph.notes}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          className="min-h-[80px] bg-muted/50 border-border/60 resize-none pr-12"
-        />
-        <div className="absolute top-2 right-2">
-          <VoiceDictationButton
-            language={language}
-            onCommit={(t) => appendDictation("notes", t)}
-            disabled={isLoading}
-            showInterim={false}
-            size="sm"
-          />
-        </div>
-      </div>
+      <Textarea
+        placeholder={ph.notes}
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        className="min-h-[80px] bg-muted/50 border-border/60 resize-none"
+      />
 
       <Button
         onClick={handleSubmit}
