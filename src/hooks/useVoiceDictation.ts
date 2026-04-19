@@ -106,17 +106,15 @@ export function useVoiceDictation({
       } catch (e) {
         emitVoiceDebug("warn", "recognizer.stop() threw", String(e));
       }
+      // NOTE: we no longer commit interim text on stop. Interim results are
+      // low-confidence guesses; committing them produces the "wrong text"
+      // problem. Only finalized results from rec.onresult get committed.
       if (commitInterim && interimBufferRef.current.trim()) {
-        try {
-          onCommitRef.current?.(interimBufferRef.current.trim());
-          emitVoiceDebug(
-            "info",
-            "committed interim on stop",
-            interimBufferRef.current.trim()
-          );
-        } catch (e) {
-          emitVoiceDebug("error", "onCommit threw on stop", String(e));
-        }
+        emitVoiceDebug(
+          "info",
+          "discarded interim on stop (low confidence)",
+          interimBufferRef.current.trim()
+        );
       }
       interimBufferRef.current = "";
       setInterim("");
@@ -164,7 +162,7 @@ export function useVoiceDictation({
     rec.lang = speechLocale[language] || "en-IN";
     rec.continuous = true;
     rec.interimResults = true;
-    rec.maxAlternatives = 1;
+    rec.maxAlternatives = 3;
 
     rec.onstart = () => {
       emitVoiceDebug("info", "onstart", { lang: rec.lang });
@@ -198,15 +196,26 @@ export function useVoiceDictation({
       lastResultAtRef.current = Date.now();
       let interimChunk = "";
       let finalChunk = "";
+      let bestConfidence = 0;
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const res = event.results[i];
-        const txt = res[0]?.transcript ?? "";
-        if (res.isFinal) finalChunk += txt + " ";
-        else interimChunk += txt;
+        // Pick the highest-confidence alternative, not just [0]
+        let best = res[0];
+        for (let a = 1; a < res.length; a++) {
+          if ((res[a]?.confidence ?? 0) > (best?.confidence ?? 0)) best = res[a];
+        }
+        const txt = best?.transcript ?? "";
+        if (res.isFinal) {
+          finalChunk += txt + " ";
+          bestConfidence = Math.max(bestConfidence, best?.confidence ?? 0);
+        } else {
+          interimChunk += txt;
+        }
       }
       emitVoiceDebug("info", "onresult", {
         final: finalChunk.trim(),
         interim: interimChunk,
+        confidence: bestConfidence ? bestConfidence.toFixed(2) : "—",
       });
       pulseLevel();
 
