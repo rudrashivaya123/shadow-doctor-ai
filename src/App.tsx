@@ -10,6 +10,7 @@ import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
 import { useTrialExpiredInterceptor } from "@/hooks/useTrialExpiredInterceptor";
 import AppLayout from "@/components/AppLayout";
+import VoiceDebugOverlay from "@/components/VoiceDebugOverlay";
 import Dashboard from "./pages/Dashboard";
 import NewConsultation from "./pages/NewConsultation";
 import EviSmartPage from "./pages/EviSmartPage";
@@ -66,6 +67,7 @@ const ProtectedApp = () => {
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/subscription" element={<SubscriptionPage />} />
       </Routes>
+      <VoiceDebugOverlay />
     </AppLayout>
   );
 };
