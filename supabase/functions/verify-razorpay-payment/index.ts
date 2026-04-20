@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { verifyPaymentAuthedBody, parseBody } from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -61,16 +62,21 @@ Deno.serve(async (req) => {
     const userId = user.id;
     console.log("Verified user:", userId);
 
-    const body = await req.json();
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
-
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      console.error("Missing payment details in body:", JSON.stringify(body));
-      return new Response(JSON.stringify({ error: "Missing payment details" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const parsed = parseBody(verifyPaymentAuthedBody, raw);
+    if (!parsed.ok) {
+      return new Response(JSON.stringify({ error: parsed.message }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = parsed.data;
 
     const RAZORPAY_KEY_SECRET = Deno.env.get("RAZORPAY_KEY_SECRET");
     if (!RAZORPAY_KEY_SECRET) {

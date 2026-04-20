@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { consultationBody, parseBody } from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -171,16 +172,19 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Too many requests. Please wait a minute." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const body = await req.json();
-    const symptoms = sanitize(body.symptoms, MAX_SYMPTOMS_LENGTH);
-    const notes = sanitize(body.notes || "", MAX_NOTES_LENGTH);
-    const language = ["en", "hi", "ta", "te", "bn", "mr"].includes(body.language) ? body.language : "en";
-    const specialty = ["general", "pediatrics", "orthopedics"].includes(body.specialty) ? body.specialty : "general";
-    const learningMode = body.learningMode === true;
-
-    if (!symptoms) {
-      return new Response(JSON.stringify({ error: "Symptoms are required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    let raw: unknown;
+    try { raw = await req.json(); } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+    const parsed = parseBody(consultationBody, raw);
+    if (!parsed.ok) {
+      return new Response(JSON.stringify({ error: parsed.message }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { symptoms, notes, language, specialty, learningMode } = parsed.data;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("AI service not configured");

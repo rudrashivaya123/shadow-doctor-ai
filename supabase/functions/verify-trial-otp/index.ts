@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { verifyOtpBody, parseBody } from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,15 +19,21 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
-    const { device_id, phone, otp } = body;
-
-    if (!device_id || !phone || !otp) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+    const parsed = parseBody(verifyOtpBody, raw);
+    if (!parsed.ok) {
+      return new Response(JSON.stringify({ error: parsed.message }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { device_id, phone, otp } = parsed.data;
 
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL")!,

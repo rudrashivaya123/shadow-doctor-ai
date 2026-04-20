@@ -24,17 +24,22 @@ const PatientForm = ({ onSuccess, onCancel }: PatientFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    const { patientSchema, firstZodError } = await import("@/lib/validation");
+    const result = patientSchema.safeParse({ name, age, gender, phone });
+    if (!result.success) {
+      toast({ title: "Invalid input", description: firstZodError(result), variant: "destructive" });
+      return;
+    }
     setLoading(true);
 
     const { data, error } = await supabase
       .from("patients")
       .insert({
         user_id: user!.id,
-        name: name.trim(),
-        age: age ? parseInt(age) : null,
-        gender: gender || null,
-        phone: phone.trim() || null,
+        name: result.data.name,
+        age: result.data.age,
+        gender: result.data.gender || null,
+        phone: result.data.phone || null,
       })
       .select()
       .single();
@@ -42,7 +47,7 @@ const PatientForm = ({ onSuccess, onCancel }: PatientFormProps) => {
     if (error) {
       toast({ title: "Error", description: "Failed to add patient.", variant: "destructive" });
     } else {
-      toast({ title: "Patient Added", description: `${name} has been registered.` });
+      toast({ title: "Patient Added", description: `${result.data.name} has been registered.` });
       onSuccess(data);
       setName(""); setAge(""); setGender(""); setPhone("");
     }

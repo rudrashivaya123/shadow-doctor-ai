@@ -44,9 +44,17 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
-  const processFiles = useCallback((files: FileList | File[]) => {
+  const processFiles = useCallback(async (files: FileList | File[]) => {
     setError(null);
-    const fileArr = Array.from(files).filter(f => f.type.startsWith("image/") && f.size <= 10 * 1024 * 1024);
+    const { validateImageFile, verifyImageMagicBytes, ALLOWED_IMAGE_MIME } = await import("@/lib/validation");
+    const fileArr: File[] = [];
+    for (const f of Array.from(files)) {
+      const err = validateImageFile(f);
+      if (err) { setError(err); continue; }
+      const ok = await verifyImageMagicBytes(f);
+      if (!ok) { setError(`"${f.name}" failed image integrity check.`); continue; }
+      fileArr.push(f);
+    }
 
     if (images.length + fileArr.length > MAX_IMAGES) {
       setError(`Maximum ${MAX_IMAGES} images allowed. You can add ${MAX_IMAGES - images.length} more.`);
@@ -66,7 +74,6 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
             label: `Image ${prev.length + 1}`, note: "",
             timestamp: new Date().toISOString().split("T")[0], tags: [],
           }];
-          // Auto-switch to timeline if 2+ images
           if (newImages.length >= 2) setViewMode("timeline");
           return newImages;
         });

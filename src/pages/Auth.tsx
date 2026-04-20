@@ -16,9 +16,15 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { loginSchema, firstZodError } = await import("@/lib/validation");
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      toast({ title: "Invalid input", description: firstZodError(result), variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email: result.data.email, password: result.data.password });
       if (error) throw error;
       navigate("/dashboard");
     } catch (err: any) {

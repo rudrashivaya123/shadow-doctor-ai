@@ -23,12 +23,10 @@ const CheckoutModal = ({ open, onOpenChange }: CheckoutModalProps) => {
   const navigate = useNavigate();
 
   const handleProceed = async () => {
-    if (!name.trim() || !email.trim()) {
-      toast({ title: "Required", description: "Please enter your name and email.", variant: "destructive" });
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" });
+    const { checkoutSchema, firstZodError } = await import("@/lib/validation");
+    const result = checkoutSchema.safeParse({ name, email, phone });
+    if (!result.success) {
+      toast({ title: "Invalid input", description: firstZodError(result), variant: "destructive" });
       return;
     }
 
