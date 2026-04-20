@@ -1,6 +1,6 @@
 // Shared input-validation helpers for Supabase Edge Functions.
 // Import via: import { ... } from "../_shared/validation.ts"
-import { z } from "https://esm.sh/zod@3.23.8";
+import { z } from "npm:zod@3.23.8";
 
 // ── Sanitizers ──────────────────────────────────────────────────────────────
 const SCRIPT_TAG = /<script\b|<\/script>|javascript:|data:text\/html/i;
