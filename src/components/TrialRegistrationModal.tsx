@@ -33,12 +33,10 @@ const TrialRegistrationModal = ({ open, onClose, onSuccess }: TrialRegistrationM
   }, [open]);
 
   const handleSubmit = async () => {
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Enter a valid email address");
-      return;
-    }
-    if (!password || password.length < 6) {
-      setError("Password must be at least 6 characters");
+    const { trialRegistrationSchema, firstZodError } = await import("@/lib/validation");
+    const result = trialRegistrationSchema.safeParse({ email, password, device_id: deviceId });
+    if (!result.success) {
+      setError(firstZodError(result));
       return;
     }
 
