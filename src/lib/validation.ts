@@ -144,6 +144,7 @@ export async function verifyImageMagicBytes(file: File): Promise<boolean> {
 
 // ── Helper: format Zod errors for UI ────────────────────────────────────────
 
-export function firstZodError(result: z.SafeParseError<unknown>): string {
+export function firstZodError(result: z.SafeParseReturnType<unknown, unknown>): string {
+  if (result.success) return "";
   return result.error.issues[0]?.message ?? "Invalid input";
 }
