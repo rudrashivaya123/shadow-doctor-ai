@@ -1,3 +1,5 @@
+import { checkoutOrderBody, parseBody } from "../_shared/validation.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -9,14 +11,21 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { name, email, phone } = await req.json();
-
-    if (!name || !email) {
-      return new Response(
-        JSON.stringify({ error: "Name and email are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+    const parsed = parseBody(checkoutOrderBody, raw);
+    if (!parsed.ok) {
+      return new Response(JSON.stringify({ error: parsed.message }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { name, email, phone } = parsed.data;
 
     const RAZORPAY_KEY_ID = Deno.env.get("RAZORPAY_KEY_ID");
     const RAZORPAY_KEY_SECRET = Deno.env.get("RAZORPAY_KEY_SECRET");

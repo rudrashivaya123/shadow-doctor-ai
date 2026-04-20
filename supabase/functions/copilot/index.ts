@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { copilotBody, parseBody } from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -95,20 +96,24 @@ serve(async (req) => {
       });
     }
 
-    const body = await req.json();
-    const symptoms = sanitize(body.symptoms, 2000);
-    const age = body.age ? String(body.age) : "";
-    const gender = body.gender ? String(body.gender) : "";
-    const temp = body.temp ? String(body.temp) : "";
-    const spo2 = body.spo2 ? String(body.spo2) : "";
-    const language = ["en", "hi", "ta", "te", "bn", "mr"].includes(body.language) ? body.language : "en";
-
-    if (!symptoms) {
-      return new Response(JSON.stringify({ error: "Symptoms required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    let raw: unknown;
+    try { raw = await req.json(); } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const parsed = parseBody(copilotBody, raw);
+    if (!parsed.ok) {
+      return new Response(JSON.stringify({ error: parsed.message }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const symptoms = parsed.data.symptoms;
+    const age = parsed.data.age ? String(parsed.data.age) : "";
+    const gender = parsed.data.gender || "";
+    const temp = parsed.data.temp || "";
+    const spo2 = parsed.data.spo2 || "";
+    const language = parsed.data.language;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("AI not configured");

@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { adminActionBody, parseBody } from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,7 +44,14 @@ Deno.serve(async (req) => {
     // Check request body for action-based routing
     let body: any = {};
     try {
-      body = await req.json();
+      const raw = await req.json();
+      const parsed = parseBody(adminActionBody, raw);
+      if (!parsed.ok) {
+        return new Response(JSON.stringify({ error: parsed.message }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      body = parsed.data || {};
     } catch {
       // No body — default to admin dashboard action
     }

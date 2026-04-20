@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { analyzeImageBody, parseBody } from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -181,23 +182,29 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("AI service not configured");
 
-    const body = await req.json();
-    const mode = body.mode || "analyze";
-    const context = (body.context || "").trim().slice(0, MAX_CONTEXT_LENGTH);
-    const language = ["en", "hi"].includes(body.language) ? body.language : "en";
-    const langLabel = language === "hi" ? "Hindi" : "English";
-
-    let images: { base64: string; mimeType: string; label: string; note: string }[] = [];
-    if (body.images && Array.isArray(body.images)) {
-      images = body.images.slice(0, MAX_IMAGES);
-    } else if (body.imageBase64 && body.mimeType) {
-      images = [{ base64: body.imageBase64, mimeType: body.mimeType, label: "Image 1", note: "" }];
-    }
-
-    if (images.length === 0) {
-      return new Response(JSON.stringify({ error: "At least one image is required" }), {
+    let raw: unknown;
+    try { raw = await req.json(); } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+    const parsed = parseBody(analyzeImageBody, raw);
+    if (!parsed.ok) {
+      return new Response(JSON.stringify({ error: parsed.message }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { mode, context: ctxRaw, language } = parsed.data;
+    const context = ctxRaw.slice(0, MAX_CONTEXT_LENGTH);
+    const langLabel = language === "hi" ? "Hindi" : language === "ta" ? "Tamil" : language === "te" ? "Telugu" : language === "bn" ? "Bengali" : language === "mr" ? "Marathi" : "English";
+
+    let images: { base64: string; mimeType: string; label: string; note: string }[] = [];
+    if (parsed.data.images && parsed.data.images.length > 0) {
+      images = parsed.data.images.slice(0, MAX_IMAGES).map((i) => ({
+        base64: i.base64, mimeType: i.mimeType, label: i.label || "Image", note: i.note || "",
+      }));
+    } else if (parsed.data.imageBase64 && parsed.data.mimeType) {
+      images = [{ base64: parsed.data.imageBase64, mimeType: parsed.data.mimeType, label: "Image 1", note: "" }];
     }
 
     const validationError = validateImages(images);

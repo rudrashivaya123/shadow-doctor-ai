@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { trialRegisterBody, parseBody } from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,32 +19,22 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
-    const { device_id, email, password } = body;
-
-    // Validate device_id
-    if (!device_id || typeof device_id !== "string" || device_id.length < 16) {
-      return new Response(
-        JSON.stringify({ error: "Invalid device identifier" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Validate email
-    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return new Response(
-        JSON.stringify({ error: "Invalid email address" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const parsed = parseBody(trialRegisterBody, raw);
+    if (!parsed.ok) {
+      return new Response(JSON.stringify({ error: parsed.message }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-
-    // Validate password
-    if (!password || typeof password !== "string" || password.length < 6) {
-      return new Response(
-        JSON.stringify({ error: "Password must be at least 6 characters" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const { device_id, email, password } = parsed.data;
 
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
