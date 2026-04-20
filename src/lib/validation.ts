@@ -13,18 +13,16 @@ import { z } from "zod";
 
 // ── Primitives ──────────────────────────────────────────────────────────────
 
-const noScriptTags = /<script|<\/script|javascript:|data:text\/html/i;
+// Reject any string containing common script/HTML injection markers.
+// Using a negated regex keeps the return type as ZodString so .min() etc. still chain.
+const SAFE_TEXT_REGEX = /^(?!.*(?:<script|<\/script|javascript:|data:text\/html))[\s\S]*$/i;
 
 const safeText = (max: number) =>
   z
     .string()
     .trim()
     .max(max, `Must be ${max} characters or fewer`)
-    .superRefine((v, ctx) => {
-      if (noScriptTags.test(v)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Contains disallowed content" });
-      }
-    });
+    .regex(SAFE_TEXT_REGEX, "Contains disallowed content");
 
 export const emailSchema = z
   .string()
