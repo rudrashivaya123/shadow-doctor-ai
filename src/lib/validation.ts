@@ -20,7 +20,11 @@ const safeText = (max: number) =>
     .string()
     .trim()
     .max(max, `Must be ${max} characters or fewer`)
-    .refine((v) => !noScriptTags.test(v), "Contains disallowed content");
+    .superRefine((v, ctx) => {
+      if (noScriptTags.test(v)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Contains disallowed content" });
+      }
+    });
 
 export const emailSchema = z
   .string()
