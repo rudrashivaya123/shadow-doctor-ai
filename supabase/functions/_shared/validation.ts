@@ -43,7 +43,7 @@ export const verifyOtpBody = z.object({
 });
 
 export const checkoutOrderBody = z.object({
-  name: safeStr(100).min(2),
+  name: safeStr(100, 2),
   email: zEmail,
   phone: z.union([zPhone, z.literal("")]).optional(),
 });
@@ -52,7 +52,7 @@ export const checkoutVerifyBody = z.object({
   razorpay_order_id: z.string().min(5).max(100),
   razorpay_payment_id: z.string().min(5).max(100),
   razorpay_signature: z.string().regex(/^[a-f0-9]{64}$/i, "Invalid signature format"),
-  name: safeStr(100).min(2),
+  name: safeStr(100, 2),
   email: zEmail,
   phone: z.union([zPhone, z.literal("")]).optional(),
 });
@@ -64,7 +64,7 @@ export const verifyPaymentAuthedBody = z.object({
 });
 
 export const consultationBody = z.object({
-  symptoms: safeStr(5000).min(3),
+  symptoms: safeStr(5000, 3),
   notes: safeStr(3000).optional().default(""),
   language: zLanguage.optional().default("en"),
   specialty: zSpecialty.optional().default("general"),
@@ -72,7 +72,7 @@ export const consultationBody = z.object({
 });
 
 export const copilotBody = z.object({
-  symptoms: safeStr(2000).min(3),
+  symptoms: safeStr(2000, 3),
   age: z.union([z.string(), z.number()]).optional(),
   gender: safeStr(20).optional(),
   temp: safeStr(20).optional(),
@@ -81,7 +81,7 @@ export const copilotBody = z.object({
 });
 
 export const evismartBody = z.object({
-  symptoms: safeStr(2000).min(3),
+  symptoms: safeStr(2000, 3),
   age: z.union([z.string(), z.number()]).optional(),
   gender: safeStr(20).optional(),
   vitals: safeStr(500).optional(),
