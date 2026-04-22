@@ -26,8 +26,8 @@ export const zLanguage = z.enum(["en", "hi", "ta", "te", "bn", "mr"]);
 export const zSpecialty = z.enum(["general", "pediatrics", "orthopedics"]);
 export const zDeviceId = z.string().min(16).max(256);
 
-const safeStr = (max: number) =>
-  z.string().trim().max(max).refine(isSafeText, "Contains disallowed content");
+const safeStr = (max: number, min = 0) =>
+  z.string().trim().min(min).max(max).refine(isSafeText, "Contains disallowed content");
 
 // ── Schemas per endpoint ────────────────────────────────────────────────────
 export const trialRegisterBody = z.object({
