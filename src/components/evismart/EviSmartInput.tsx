@@ -68,13 +68,32 @@ const EviSmartInput = ({ onSubmit, isLoading, onReset, language = "en" }: Props)
         </div>
       </div>
 
-      <Textarea
-        placeholder="Type symptoms... (Hinglish OK) e.g. 'bukhar 3 din, dry cough, no appetite'"
-        value={symptoms}
-        onChange={(e) => setSymptoms(e.target.value)}
-        className="min-h-[70px] text-sm resize-none"
-        maxLength={2000}
-      />
+      <div className="relative">
+        <Textarea
+          placeholder="Type or speak symptoms... (Hinglish OK) e.g. 'bukhar 3 din, dry cough'"
+          value={symptoms}
+          onChange={(e) => setSymptoms(e.target.value)}
+          className="min-h-[70px] text-sm resize-none pr-10"
+          maxLength={2000}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={handleMicClick}
+          title={isListening ? "Stop listening" : "Voice input"}
+          aria-label={isListening ? "Stop voice input" : "Start voice input"}
+          className={`absolute top-1.5 right-1.5 h-7 w-7 ${isListening ? "text-destructive animate-pulse" : "text-muted-foreground"}`}
+        >
+          {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+        </Button>
+      </div>
+      {isListening && (
+        <div className="flex items-center gap-1.5 text-[10px] text-destructive">
+          <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+          Listening…
+        </div>
+      )}
 
       {!showOptional && (
         <button
