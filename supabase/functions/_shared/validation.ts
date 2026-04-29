@@ -22,7 +22,7 @@ export const zEmail = z.string().trim().toLowerCase().min(3).max(254).email();
 export const zPassword = z.string().min(6).max(128);
 export const zPhone = z.string().trim().regex(/^[+\d\s\-()]{7,20}$/);
 export const zUuid = z.string().uuid();
-export const zLanguage = z.enum(["en", "hi", "ta", "te", "bn", "mr"]);
+export const zLanguage = z.enum(["en", "hi", "ta", "te", "bn", "mr", "bho"]);
 export const zSpecialty = z.enum(["general", "pediatrics", "orthopedics"]);
 export const zDeviceId = z.string().min(16).max(256);
 
