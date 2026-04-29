@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Mic, MicOff, Send, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useTypingSuggestions } from "@/hooks/useTypingSuggestions";
+import { useSpeechToText } from "@/hooks/useVoice";
+import { useToast } from "@/hooks/use-toast";
 import type { Language } from "@/types/clinical";
 
 interface ConsultationInputProps {
@@ -58,9 +60,22 @@ const categoryColor: Record<string, string> = {
 const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: ConsultationInputProps) => {
   const [symptoms, setSymptoms] = useState("");
   const [notes, setNotes] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
+  const baseSymptomsRef = useRef("");
+  const { toast } = useToast();
 
   const suggestions = useTypingSuggestions(symptoms);
+
+  const { isListening, supported: sttSupported, toggle: toggleMic, error: sttError } =
+    useSpeechToText(language, (text) => {
+      const base = baseSymptomsRef.current;
+      setSymptoms(base ? `${base} ${text}`.trim() : text);
+    });
+
+  // Surface mic errors via toast
+  if (sttError) {
+    // fire-and-forget; toast dedup handled by sonner
+    setTimeout(() => toast({ title: "Microphone", description: sttError, variant: "destructive" }), 0);
+  }
 
   const handleSubmit = () => {
     if (!symptoms.trim()) return;
@@ -70,7 +85,7 @@ const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: Consultat
   const handleReset = () => {
     setSymptoms("");
     setNotes("");
-    setIsRecording(false);
+    baseSymptomsRef.current = "";
     onReset?.();
   };
 
@@ -80,30 +95,17 @@ const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: Consultat
     setSymptoms(words.join(", ") + ", ");
   };
 
-  const toggleRecording = () => {
-    if (isRecording) {
-      setIsRecording(false);
-    } else {
-      setIsRecording(true);
-      if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-        const SpeechRecognition =
-          (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        recognition.lang = speechLocale[language] || "en-IN";
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          setSymptoms((prev) => (prev ? prev + " " + transcript : transcript));
-          setIsRecording(false);
-        };
-        recognition.onerror = () => setIsRecording(false);
-        recognition.onend = () => setIsRecording(false);
-        recognition.start();
-      } else {
-        setTimeout(() => setIsRecording(false), 2000);
-      }
+  const handleMicClick = () => {
+    if (!sttSupported) {
+      toast({
+        title: "Not supported",
+        description: "Voice input is not available in this browser.",
+        variant: "destructive",
+      });
+      return;
     }
+    if (!isListening) baseSymptomsRef.current = symptoms;
+    toggleMic();
   };
 
   const ph = placeholders[language];
