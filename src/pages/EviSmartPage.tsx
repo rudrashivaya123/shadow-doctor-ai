@@ -7,7 +7,6 @@ import TrialBanner from "@/components/TrialBanner";
 import FeatureGate from "@/components/FeatureGate";
 import EviSmartInput from "@/components/evismart/EviSmartInput";
 import EviSmartOutput from "@/components/evismart/EviSmartOutput";
-import VoiceControls from "@/components/VoiceControls";
 import EviSmartVoicePanel from "@/components/evismart/EviSmartVoicePanel";
 import type { EviSmartResult } from "@/types/evismart";
 import type { Language } from "@/types/clinical";
