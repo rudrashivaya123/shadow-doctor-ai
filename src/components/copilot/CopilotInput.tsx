@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronDown, ChevronUp, Loader2, Brain, RotateCcw } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Brain, RotateCcw, Mic, MicOff } from "lucide-react";
+import { useSpeechToText } from "@/hooks/useVoice";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   onSubmit: (data: { symptoms: string; age?: string; gender?: string; temp?: string; spo2?: string }) => void;
   isLoading: boolean;
   onReset?: () => void;
+  language?: string;
 }
 
-const CopilotInput = ({ onSubmit, isLoading, onReset }: Props) => {
+const CopilotInput = ({ onSubmit, isLoading, onReset, language = "en" }: Props) => {
   const [symptoms, setSymptoms] = useState("");
   const [showOptional, setShowOptional] = useState(false);
   const [age, setAge] = useState("");
