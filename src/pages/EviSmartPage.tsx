@@ -7,6 +7,7 @@ import TrialBanner from "@/components/TrialBanner";
 import FeatureGate from "@/components/FeatureGate";
 import EviSmartInput from "@/components/evismart/EviSmartInput";
 import EviSmartOutput from "@/components/evismart/EviSmartOutput";
+import EviSmartVoicePanel from "@/components/evismart/EviSmartVoicePanel";
 import type { EviSmartResult } from "@/types/evismart";
 import type { Language } from "@/types/clinical";
 
@@ -60,9 +61,10 @@ const EviSmartPage = ({ language }: Props) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <div className="lg:col-span-2">
-          <EviSmartInput onSubmit={handleSubmit} isLoading={isLoading} onReset={() => setResult(null)} />
+          <EviSmartInput onSubmit={handleSubmit} isLoading={isLoading} onReset={() => setResult(null)} language={language} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 space-y-3">
+          {result && <EviSmartVoicePanel result={result} language={language} />}
           <EviSmartOutput result={result} />
         </div>
       </div>

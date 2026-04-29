@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ConsultationInput from "@/components/ConsultationInput";
 import AISuggestionsPanel from "@/components/AISuggestionsPanel";
 import ConsultationSummary from "@/components/ConsultationSummary";
+import VoiceControls from "@/components/VoiceControls";
 import ImageUpload from "@/components/ImageUpload";
 import ImageDiagnosisPanel from "@/components/ImageDiagnosisPanel";
 import SpecialtySelector from "@/components/SpecialtySelector";
@@ -190,6 +191,25 @@ const NewConsultation = ({ language }: Props) => {
                 }}
               />
               {analysis && <RiskScoreBadge score={analysis.risk_score} level={analysis.emergency_level} />}
+              {analysis && (
+                <div className="glass-card p-3 flex items-center justify-between gap-2">
+                  <span className="text-xs text-muted-foreground">Voice response</span>
+                  <VoiceControls
+                    text={[
+                      `Primary diagnosis: ${analysis.primary_diagnosis}.`,
+                      (analysis.differentials ?? []).length
+                        ? `Differentials: ${(analysis.differentials ?? []).join(", ")}.`
+                        : "",
+                      (analysis.treatment ?? []).length
+                        ? `Treatment plan: ${(analysis.treatment ?? []).join(". ")}.`
+                        : "",
+                    ].filter(Boolean).join(" ")}
+                    language={language}
+                    autoPlay
+                    label="Play"
+                  />
+                </div>
+              )}
               <LearningMode enabled={learningMode} onToggle={setLearningMode} analysis={analysis} />
               {analysis && <ConsultationSummary symptoms={lastSymptoms} notes={lastNotes} analysis={analysis} />}
             </div>

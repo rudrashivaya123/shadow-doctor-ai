@@ -7,6 +7,7 @@ import TrialBanner from "@/components/TrialBanner";
 import FeatureGate from "@/components/FeatureGate";
 import CopilotInput from "@/components/copilot/CopilotInput";
 import CopilotOutput from "@/components/copilot/CopilotOutput";
+import CopilotVoicePanel from "@/components/copilot/CopilotVoicePanel";
 import type { CopilotResult } from "@/types/copilot";
 import type { Language } from "@/types/clinical";
 
@@ -60,9 +61,10 @@ const CopilotPage = ({ language }: Props) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <div className="lg:col-span-2">
-          <CopilotInput onSubmit={handleSubmit} isLoading={isLoading} onReset={() => setResult(null)} />
+          <CopilotInput onSubmit={handleSubmit} isLoading={isLoading} onReset={() => setResult(null)} language={language} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 space-y-3">
+          {result && <CopilotVoicePanel result={result} language={language} />}
           <CopilotOutput result={result} />
         </div>
       </div>
