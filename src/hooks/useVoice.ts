@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type VoiceLang = "en" | "hi" | "mr" | "ta" | "te" | "bn";
+type VoiceLang = "en" | "hi" | "mr" | "ta" | "te" | "bn" | "bho";
 
 const speechLocaleMap: Record<string, string> = {
   en: "en-IN",
@@ -9,6 +9,8 @@ const speechLocaleMap: Record<string, string> = {
   ta: "ta-IN",
   te: "te-IN",
   bn: "bn-IN",
+  // Bhojpuri has no dedicated Web Speech locale; fall back to Hindi (closest phonetic match)
+  bho: "hi-IN",
 };
 
 const getSR = (): any => {
