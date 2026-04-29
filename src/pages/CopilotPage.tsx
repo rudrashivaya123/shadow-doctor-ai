@@ -8,6 +8,7 @@ import FeatureGate from "@/components/FeatureGate";
 import CopilotInput from "@/components/copilot/CopilotInput";
 import CopilotOutput from "@/components/copilot/CopilotOutput";
 import VoiceControls from "@/components/VoiceControls";
+import CopilotVoicePanel from "@/components/copilot/CopilotVoicePanel";
 import type { CopilotResult } from "@/types/copilot";
 import type { Language } from "@/types/clinical";
 
