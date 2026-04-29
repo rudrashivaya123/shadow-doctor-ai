@@ -174,17 +174,23 @@ export const useTextToSpeech = (language: VoiceLang | string = "en") => {
       return;
     }
     const u = new SpeechSynthesisUtterance(next);
-    u.lang = speechLocaleMap[language] || "en-IN";
+    const targetLang = speechLocaleMap[language] || "en-IN";
+    const baseLang = targetLang.split("-")[0];
+    u.lang = targetLang;
     u.rate = 0.92; // slightly slower for clarity
     u.pitch = 1;
     u.volume = 1;
-    // Try to pick a matching voice
+    // Try to pick a matching voice (exact locale, then base language)
     try {
       const voices = window.speechSynthesis.getVoices();
       const match =
-        voices.find((v) => v.lang === u.lang) ||
-        voices.find((v) => v.lang?.startsWith(u.lang.split("-")[0]));
-      if (match) u.voice = match;
+        voices.find((v) => v.lang?.toLowerCase() === targetLang.toLowerCase()) ||
+        voices.find((v) => v.lang?.toLowerCase().startsWith(baseLang.toLowerCase() + "-")) ||
+        voices.find((v) => v.lang?.toLowerCase().startsWith(baseLang.toLowerCase()));
+      if (match) {
+        u.voice = match;
+        u.lang = match.lang; // align utterance lang with voice to avoid engine fallback
+      }
     } catch {
       /* ignore */
     }
