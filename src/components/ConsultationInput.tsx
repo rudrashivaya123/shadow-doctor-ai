@@ -128,15 +128,17 @@ const ConsultationInput = ({ onSubmit, isLoading, language, onReset }: Consultat
           <Button
             variant="outline"
             size="icon"
-            onClick={toggleRecording}
-            className={isRecording ? "border-destructive text-destructive animate-pulse-slow" : ""}
+            onClick={handleMicClick}
+            title={isListening ? "Stop listening" : "Start voice input"}
+            aria-label={isListening ? "Stop voice input" : "Start voice input"}
+            className={isListening ? "border-destructive text-destructive animate-pulse-slow" : ""}
           >
-            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
         </div>
       </div>
 
-      {isRecording && (
+      {isListening && (
         <div className="flex items-center gap-2 text-sm text-destructive">
           <span className="h-2 w-2 rounded-full bg-destructive animate-pulse-slow" />
           Listening...
