@@ -21,6 +21,24 @@ const CopilotInput = ({ onSubmit, isLoading, onReset, language = "en" }: Props) 
   const [gender, setGender] = useState("");
   const [temp, setTemp] = useState("");
   const [spo2, setSpo2] = useState("");
+  const baseSymptomsRef = useRef("");
+  const { toast } = useToast();
+  const { isListening, supported: sttSupported, toggle: toggleMic } = useSpeechToText(
+    language,
+    (text) => {
+      const base = baseSymptomsRef.current;
+      setSymptoms(base ? `${base} ${text}`.trim() : text);
+    },
+  );
+
+  const handleMicClick = () => {
+    if (!sttSupported) {
+      toast({ title: "Not supported", description: "Voice input not available in this browser.", variant: "destructive" });
+      return;
+    }
+    if (!isListening) baseSymptomsRef.current = symptoms;
+    toggleMic();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,13 +78,32 @@ const CopilotInput = ({ onSubmit, isLoading, onReset, language = "en" }: Props) 
             </div>
           </div>
 
-          <Textarea
-            value={symptoms}
-            onChange={(e) => setSymptoms(e.target.value)}
-            placeholder="e.g. fever 3 din se, cough, diabetic"
-            className="min-h-[80px] text-sm resize-none"
-            maxLength={2000}
-          />
+          <div className="relative">
+            <Textarea
+              value={symptoms}
+              onChange={(e) => setSymptoms(e.target.value)}
+              placeholder="e.g. fever 3 din se, cough, diabetic"
+              className="min-h-[80px] text-sm resize-none pr-10"
+              maxLength={2000}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleMicClick}
+              title={isListening ? "Stop listening" : "Voice input"}
+              aria-label={isListening ? "Stop voice input" : "Start voice input"}
+              className={`absolute top-1.5 right-1.5 h-7 w-7 ${isListening ? "text-destructive animate-pulse" : "text-muted-foreground"}`}
+            >
+              {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </Button>
+          </div>
+          {isListening && (
+            <div className="flex items-center gap-1.5 text-[10px] text-destructive">
+              <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+              Listening…
+            </div>
+          )}
 
           <button
             type="button"
