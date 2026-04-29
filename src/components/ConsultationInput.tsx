@@ -40,10 +40,6 @@ const placeholders: Record<Language, { symptoms: string; notes: string }> = {
     symptoms: "रुग्णाची लक्षणे प्रविष्ट करा... (उदा., 3 दिवसांपासून ताप, डोकेदुखी)",
     notes: "डॉक्टरांच्या नोंदी (पर्यायी)...",
   },
-  bho: {
-    symptoms: "मरीज के लक्षण लिखीं... (जइसे, 3 दिन से बोखार, सिर में दरद)",
-    notes: "डॉक्टर के नोट (वैकल्पिक)...",
-  },
 };
 
 const speechLocale: Record<Language, string> = {
@@ -53,7 +49,6 @@ const speechLocale: Record<Language, string> = {
   te: "te-IN",
   bn: "bn-IN",
   mr: "mr-IN",
-  bho: "hi-IN",
 };
 
 const categoryColor: Record<string, string> = {

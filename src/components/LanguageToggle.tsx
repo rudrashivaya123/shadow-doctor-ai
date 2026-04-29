@@ -19,10 +19,9 @@ const languageMeta: Record<Language, { short: string; native: string; english: s
   te: { short: "తె", native: "తెలుగు", english: "Telugu" },
   bn: { short: "বাং", native: "বাংলা", english: "Bengali" },
   mr: { short: "मरा", native: "मराठी", english: "Marathi" },
-  bho: { short: "भोज", native: "भोजपुरी", english: "Bhojpuri" },
 };
 
-const order: Language[] = ["en", "hi", "ta", "te", "bn", "mr", "bho"];
+const order: Language[] = ["en", "hi", "ta", "te", "bn", "mr"];
 
 const LanguageToggle = ({ language, onChange }: LanguageToggleProps) => {
   const current = languageMeta[language];
