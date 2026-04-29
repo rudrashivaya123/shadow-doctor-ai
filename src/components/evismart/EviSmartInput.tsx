@@ -1,22 +1,43 @@
-import { useState } from "react";
-import { Zap, User, Activity, RotateCcw } from "lucide-react";
+import { useState, useRef } from "react";
+import { Zap, User, Activity, RotateCcw, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSpeechToText } from "@/hooks/useVoice";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   onSubmit: (data: { symptoms: string; age?: string; gender?: string; vitals?: string }) => void;
   isLoading: boolean;
   onReset?: () => void;
+  language?: string;
 }
 
-const EviSmartInput = ({ onSubmit, isLoading, onReset }: Props) => {
+const EviSmartInput = ({ onSubmit, isLoading, onReset, language = "en" }: Props) => {
   const [symptoms, setSymptoms] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [vitals, setVitals] = useState("");
   const [showOptional, setShowOptional] = useState(false);
+  const baseSymptomsRef = useRef("");
+  const { toast } = useToast();
+  const { isListening, supported: sttSupported, toggle: toggleMic } = useSpeechToText(
+    language,
+    (text) => {
+      const base = baseSymptomsRef.current;
+      setSymptoms(base ? `${base} ${text}`.trim() : text);
+    },
+  );
+
+  const handleMicClick = () => {
+    if (!sttSupported) {
+      toast({ title: "Not supported", description: "Voice input not available in this browser.", variant: "destructive" });
+      return;
+    }
+    if (!isListening) baseSymptomsRef.current = symptoms;
+    toggleMic();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
