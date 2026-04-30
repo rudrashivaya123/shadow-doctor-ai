@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import Auth from "./pages/Auth";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -28,7 +28,7 @@ import SupportPage from "./pages/SupportPage";
 import MedicalDisclaimerPage from "./pages/MedicalDisclaimerPage";
 import AIDisclaimerPage from "./pages/AIDisclaimerPage";
 import DataConsentPage from "./pages/DataConsentPage";
-import TrialExpired from "./pages/TrialExpired";
+
 import NotFound from "./pages/NotFound";
 import type { Language } from "@/types/clinical";
 
@@ -42,9 +42,9 @@ const ProtectedApp = () => {
 
   const handleSync = useCallback(() => {}, []);
 
-  // If trial expired and not premium, show full-screen upgrade
+  // If trial expired and not premium, send user back to the landing page with upgrade prompt
   if (!trial.loading && isFeatureLocked(trial)) {
-    return <TrialExpired />;
+    return <Navigate to="/?upgrade=1" replace />;
   }
 
   return (
@@ -85,7 +85,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  const trial = useTrialStatus();
+  const location = useLocation();
+  if (loading || (user && trial.loading)) return null;
+  // Logged-in users with expired trial stay on landing to upgrade
+  if (user && isFeatureLocked(trial)) return <>{children}</>;
+  // Allow explicit upgrade landing even for premium/trial-active users if they navigated here
+  if (user && location.pathname === "/" && location.search.includes("upgrade=1")) {
+    return <>{children}</>;
+  }
   if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
