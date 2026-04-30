@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Activity } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Activity, Crown, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TrialRegistrationModal from "@/components/TrialRegistrationModal";
 import AppFooter from "@/components/AppFooter";
@@ -10,16 +10,38 @@ import LandingFeatures from "@/components/landing/LandingFeatures";
 import LandingTestimonials from "@/components/landing/LandingTestimonials";
 import LandingPricing from "@/components/landing/LandingPricing";
 import LandingFAQ from "@/components/landing/LandingFAQ";
+import { useAuth } from "@/hooks/useAuth";
+import { useRazorpay } from "@/hooks/useRazorpay";
+import { supabase } from "@/integrations/supabase/client";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+  const { initiatePayment } = useRazorpay(() => navigate("/dashboard"));
   const [showTrialModal, setShowTrialModal] = useState(false);
+
+  const isUpgradeMode = searchParams.get("upgrade") === "1" && !!user;
+
+  // When a trial-expired user is bounced here, scroll to pricing immediately.
+  useEffect(() => {
+    if (isUpgradeMode) {
+      setTimeout(() => {
+        document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+      }, 200);
+    }
+  }, [isUpgradeMode]);
 
   const scrollToPricing = () => {
     document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const openTrial = () => setShowTrialModal(true);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/", { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -42,19 +64,45 @@ const LandingPage = () => {
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={() => navigate("/contact")}>
               Contact
             </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate("/auth")}>
-              Login
-            </Button>
+            {user ? (
+              <Button size="sm" variant="outline" onClick={handleSignOut} className="gap-1.5">
+                <LogOut className="h-3.5 w-3.5" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" onClick={() => navigate("/auth")}>
+                Login
+              </Button>
+            )}
           </div>
         </nav>
       </header>
 
+      {/* Trial-expired banner */}
+      {isUpgradeMode && (
+        <div className="bg-destructive/10 border-b border-destructive/30">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-sm font-medium text-foreground text-center sm:text-left">
+              ⏰ Your free trial has ended. Upgrade to Pro to continue using ShadowMD.
+            </p>
+            <Button
+              size="sm"
+              className="gap-1.5 bg-success hover:bg-success/90 text-success-foreground font-semibold shrink-0"
+              onClick={initiatePayment}
+            >
+              <Crown className="h-3.5 w-3.5" />
+              Upgrade — ₹1,499/mo
+            </Button>
+          </div>
+        </div>
+      )}
+
       <main>
-        <LandingHero onStartTrial={openTrial} />
+        <LandingHero onStartTrial={isUpgradeMode ? initiatePayment : openTrial} />
         <LandingSocialProof />
         <LandingFeatures />
         <LandingTestimonials />
-        <LandingPricing onStartTrial={openTrial} />
+        <LandingPricing onStartTrial={isUpgradeMode ? initiatePayment : openTrial} />
         <LandingFAQ />
 
         {/* Disclaimer */}
