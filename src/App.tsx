@@ -28,7 +28,7 @@ import SupportPage from "./pages/SupportPage";
 import MedicalDisclaimerPage from "./pages/MedicalDisclaimerPage";
 import AIDisclaimerPage from "./pages/AIDisclaimerPage";
 import DataConsentPage from "./pages/DataConsentPage";
-import TrialExpired from "./pages/TrialExpired";
+
 import NotFound from "./pages/NotFound";
 import type { Language } from "@/types/clinical";
 
