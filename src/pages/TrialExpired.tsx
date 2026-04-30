@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   Activity, CheckCircle, Crown, Shield, Lock, Mail, Brain, Stethoscope, FileText,
 } from "lucide-react";
