@@ -42,9 +42,9 @@ const ProtectedApp = () => {
 
   const handleSync = useCallback(() => {}, []);
 
-  // If trial expired and not premium, show full-screen upgrade
+  // If trial expired and not premium, send user back to the landing page with upgrade prompt
   if (!trial.loading && isFeatureLocked(trial)) {
-    return <TrialExpired />;
+    return <Navigate to="/?upgrade=1" replace />;
   }
 
   return (
