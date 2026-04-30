@@ -85,7 +85,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  const trial = useTrialStatus();
+  const location = useLocation();
+  if (loading || (user && trial.loading)) return null;
+  // Logged-in users with expired trial stay on landing to upgrade
+  if (user && isFeatureLocked(trial)) return <>{children}</>;
+  // Allow explicit upgrade landing even for premium/trial-active users if they navigated here
+  if (user && location.pathname === "/" && location.search.includes("upgrade=1")) {
+    return <>{children}</>;
+  }
   if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
