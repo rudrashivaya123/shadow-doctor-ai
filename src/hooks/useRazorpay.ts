@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -10,22 +10,47 @@ declare global {
   }
 }
 
+// Lazy-load the Razorpay checkout script only when the user clicks "Upgrade".
+// Loading it eagerly causes ~68ms of forced reflow on initial page load.
+const loadRazorpayScript = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") return reject(new Error("No window"));
+    if (window.Razorpay) return resolve();
+    const existing = document.getElementById("razorpay-script") as HTMLScriptElement | null;
+    if (existing) {
+      if (window.Razorpay) return resolve();
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(new Error("Razorpay script failed to load")), { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "razorpay-script";
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Razorpay script failed to load"));
+    document.body.appendChild(script);
+  });
+};
+
 export const useRazorpay = (onSuccess?: () => void) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (document.getElementById("razorpay-script")) return;
-    const script = document.createElement("script");
-    script.id = "razorpay-script";
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-
   const initiatePayment = useCallback(async () => {
     try {
+      try {
+        await loadRazorpayScript();
+      } catch {
+        toast({
+          title: "Payment Error",
+          description: "Could not load payment system. Please check your connection and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data: orderData, error } = await supabase.functions.invoke(
         "create-razorpay-order"
       );
