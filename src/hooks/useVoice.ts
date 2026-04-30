@@ -241,15 +241,37 @@ export const useTextToSpeech = (language: VoiceLang | string = "en") => {
     }
   }, [supported]);
 
+  // Cancel speech on unmount AND on page refresh/exit
   useEffect(() => {
-    return () => {
+    if (!supported) return;
+
+    const cancelAll = () => {
       try {
+        cancelledRef.current = true;
+        queueRef.current = [];
         window.speechSynthesis?.cancel();
       } catch {
         /* ignore */
       }
     };
-  }, []);
+
+    const handleBeforeUnload = () => cancelAll();
+    const handlePageHide = () => cancelAll();
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") cancelAll();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("pagehide", handlePageHide);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("pagehide", handlePageHide);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      cancelAll();
+    };
+  }, [supported]);
 
   // Some browsers load voices asynchronously
   useEffect(() => {
