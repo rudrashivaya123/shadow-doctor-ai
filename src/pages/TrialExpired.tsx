@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   Activity, CheckCircle, Crown, Shield, Lock, Mail, Brain, Stethoscope, FileText,
 } from "lucide-react";
@@ -15,14 +14,8 @@ const benefits = [
 const TrialExpired = () => {
   const { initiatePayment } = useRazorpay();
 
-  useEffect(() => {
-    if (document.getElementById("razorpay-script")) return;
-    const s = document.createElement("script");
-    s.id = "razorpay-script";
-    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-    s.async = true;
-    document.body.appendChild(s);
-  }, []);
+  // Razorpay script is now lazy-loaded inside useRazorpay's initiatePayment
+  // to avoid forced reflows on initial page load.
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
