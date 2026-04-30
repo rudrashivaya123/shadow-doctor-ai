@@ -11,6 +11,7 @@ import LandingTestimonials from "@/components/landing/LandingTestimonials";
 import LandingPricing from "@/components/landing/LandingPricing";
 import LandingFAQ from "@/components/landing/LandingFAQ";
 import { useAuth } from "@/hooks/useAuth";
+import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
 import { useRazorpay } from "@/hooks/useRazorpay";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,10 +19,14 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
+  const trial = useTrialStatus();
   const { initiatePayment } = useRazorpay(() => navigate("/dashboard"));
   const [showTrialModal, setShowTrialModal] = useState(false);
 
-  const isUpgradeMode = searchParams.get("upgrade") === "1" && !!user;
+  // Show upgrade prompt whenever a logged-in user's trial is expired,
+  // OR when the explicit ?upgrade=1 param is present.
+  const trialExpired = !!user && !trial.loading && isFeatureLocked(trial);
+  const isUpgradeMode = trialExpired || (searchParams.get("upgrade") === "1" && !!user);
 
   // When a trial-expired user is bounced here, scroll to pricing immediately.
   useEffect(() => {
