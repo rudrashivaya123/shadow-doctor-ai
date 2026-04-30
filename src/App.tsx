@@ -1,36 +1,44 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
-import Auth from "./pages/Auth";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useTrialStatus, isFeatureLocked } from "@/hooks/useTrialStatus";
 import { useTrialExpiredInterceptor } from "@/hooks/useTrialExpiredInterceptor";
-import AppLayout from "@/components/AppLayout";
-import Dashboard from "./pages/Dashboard";
-import NewConsultation from "./pages/NewConsultation";
-import EviSmartPage from "./pages/EviSmartPage";
-import CopilotPage from "./pages/CopilotPage";
-import Patients from "./pages/Patients";
-import PatientProfile from "./pages/PatientProfile";
-import ConsultationDetail from "./pages/ConsultationDetail";
-import HistoryPage from "./pages/HistoryPage";
-import SubscriptionPage from "./pages/SubscriptionPage";
 import LandingPage from "./pages/LandingPage";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsConditions from "./pages/TermsConditions";
-import RefundPolicy from "./pages/RefundPolicy";
-import ContactPage from "./pages/ContactPage";
-import SupportPage from "./pages/SupportPage";
-import MedicalDisclaimerPage from "./pages/MedicalDisclaimerPage";
-import AIDisclaimerPage from "./pages/AIDisclaimerPage";
-import DataConsentPage from "./pages/DataConsentPage";
-
-import NotFound from "./pages/NotFound";
 import type { Language } from "@/types/clinical";
+
+// Lazy-load every non-landing route so the public landing ships a much smaller
+// initial JS bundle (improves First Contentful Paint).
+const Auth = lazy(() => import("./pages/Auth"));
+const AppLayout = lazy(() => import("@/components/AppLayout"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const NewConsultation = lazy(() => import("./pages/NewConsultation"));
+const EviSmartPage = lazy(() => import("./pages/EviSmartPage"));
+const CopilotPage = lazy(() => import("./pages/CopilotPage"));
+const Patients = lazy(() => import("./pages/Patients"));
+const PatientProfile = lazy(() => import("./pages/PatientProfile"));
+const ConsultationDetail = lazy(() => import("./pages/ConsultationDetail"));
+const HistoryPage = lazy(() => import("./pages/HistoryPage"));
+const SubscriptionPage = lazy(() => import("./pages/SubscriptionPage"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsConditions = lazy(() => import("./pages/TermsConditions"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const SupportPage = lazy(() => import("./pages/SupportPage"));
+const MedicalDisclaimerPage = lazy(() => import("./pages/MedicalDisclaimerPage"));
+const AIDisclaimerPage = lazy(() => import("./pages/AIDisclaimerPage"));
+const DataConsentPage = lazy(() => import("./pages/DataConsentPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const RouteFallback = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
