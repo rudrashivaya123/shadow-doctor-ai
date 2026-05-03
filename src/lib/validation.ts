@@ -112,7 +112,12 @@ export const MAX_IMAGES_PER_UPLOAD = 5;
  * Returns null if valid, else an error string.
  */
 export function validateImageFile(file: File): string | null {
-  if (!ALLOWED_IMAGE_MIME.includes(file.type as any)) {
+  // Some mobile browsers report empty or non-standard MIME types for gallery/camera files.
+  // Fall back to extension sniffing so legitimate JPEG/PNG/WebP files aren't silently rejected.
+  const name = (file.name || "").toLowerCase();
+  const extOk = /\.(jpe?g|png|webp)$/i.test(name);
+  const mimeOk = ALLOWED_IMAGE_MIME.includes(file.type as any);
+  if (!mimeOk && !extOk) {
     return `Unsupported file type. Use JPEG, PNG, or WebP.`;
   }
   if (file.size > MAX_IMAGE_BYTES) {
@@ -125,20 +130,34 @@ export function validateImageFile(file: File): string | null {
 }
 
 /**
+ * Resolve the effective MIME type for a file, falling back to extension when the
+ * browser doesn't report one (common on Android camera/gallery uploads).
+ */
+export function resolveImageMime(file: File): "image/jpeg" | "image/png" | "image/webp" | null {
+  if (ALLOWED_IMAGE_MIME.includes(file.type as any)) return file.type as any;
+  const name = (file.name || "").toLowerCase();
+  if (/\.(jpe?g)$/i.test(name)) return "image/jpeg";
+  if (/\.png$/i.test(name)) return "image/png";
+  if (/\.webp$/i.test(name)) return "image/webp";
+  return null;
+}
+
+/**
  * Verify a file's magic-byte signature matches its declared MIME type.
  * Defends against polyglot / disguised file attacks.
  */
 export async function verifyImageMagicBytes(file: File): Promise<boolean> {
   const buf = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  const resolved = resolveImageMime(file);
   // JPEG: FF D8 FF
-  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return file.type === "image/jpeg";
-  // PNG: 89 50 4E 47 0D 0A 1A 0A
-  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return file.type === "image/png";
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return resolved === "image/jpeg";
+  // PNG: 89 50 4E 47
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return resolved === "image/png";
   // WebP: RIFF????WEBP
   if (
     buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46 &&
     buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50
-  ) return file.type === "image/webp";
+  ) return resolved === "image/webp";
   return false;
 }
 

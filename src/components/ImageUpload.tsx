@@ -46,22 +46,24 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
 
   const processFiles = useCallback(async (files: FileList | File[]) => {
     setError(null);
-    const { validateImageFile, verifyImageMagicBytes, ALLOWED_IMAGE_MIME } = await import("@/lib/validation");
-    const fileArr: File[] = [];
+    const { validateImageFile, verifyImageMagicBytes, resolveImageMime } = await import("@/lib/validation");
+    const accepted: { file: File; mime: "image/jpeg" | "image/png" | "image/webp" }[] = [];
     for (const f of Array.from(files)) {
       const err = validateImageFile(f);
       if (err) { setError(err); continue; }
       const ok = await verifyImageMagicBytes(f);
       if (!ok) { setError(`"${f.name}" failed image integrity check.`); continue; }
-      fileArr.push(f);
+      const mime = resolveImageMime(f);
+      if (!mime) { setError(`"${f.name}" has an unsupported format.`); continue; }
+      accepted.push({ file: f, mime });
     }
 
-    if (images.length + fileArr.length > MAX_IMAGES) {
+    if (images.length + accepted.length > MAX_IMAGES) {
       setError(`Maximum ${MAX_IMAGES} images allowed. You can add ${MAX_IMAGES - images.length} more.`);
       return;
     }
 
-    fileArr.forEach((file) => {
+    accepted.forEach(({ file, mime }) => {
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result as string;
@@ -70,7 +72,7 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
         setImages(prev => {
           if (prev.length >= MAX_IMAGES) return prev;
           const newImages = [...prev, {
-            id, base64, mimeType: file.type, preview: result,
+            id, base64, mimeType: mime, preview: result,
             label: `Image ${prev.length + 1}`, note: "",
             timestamp: new Date().toISOString().split("T")[0], tags: [],
           }];
@@ -78,6 +80,7 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
           return newImages;
         });
       };
+      reader.onerror = () => setError(`Could not read "${file.name}". Try another image.`);
       reader.readAsDataURL(file);
     });
   }, [images.length]);
@@ -319,7 +322,7 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
       )}
 
       {/* Hidden inputs */}
-      <input ref={fileRef} type="file" accept="image/jpeg,image/png" multiple className="hidden"
+      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/jpg,.jpg,.jpeg,.png,.webp" multiple className="hidden"
         onChange={(e) => { if (e.target.files?.length) processFiles(e.target.files); e.target.value = ""; }}
       />
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
