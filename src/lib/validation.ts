@@ -148,15 +148,16 @@ export function resolveImageMime(file: File): "image/jpeg" | "image/png" | "imag
  */
 export async function verifyImageMagicBytes(file: File): Promise<boolean> {
   const buf = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  const resolved = resolveImageMime(file);
   // JPEG: FF D8 FF
-  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return file.type === "image/jpeg";
-  // PNG: 89 50 4E 47 0D 0A 1A 0A
-  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return file.type === "image/png";
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return resolved === "image/jpeg";
+  // PNG: 89 50 4E 47
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return resolved === "image/png";
   // WebP: RIFF????WEBP
   if (
     buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46 &&
     buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50
-  ) return file.type === "image/webp";
+  ) return resolved === "image/webp";
   return false;
 }
 
