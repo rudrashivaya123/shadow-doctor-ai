@@ -73,10 +73,12 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
     });
 
   const processFiles = useCallback(async (files: FileList | File[]) => {
+    const selectedFiles = Array.from(files);
+    if (selectedFiles.length === 0) return;
     setError(null);
     const { validateImageFile, verifyImageMagicBytes, resolveImageMime } = await import("@/lib/validation");
     const accepted: { file: File; mime: "image/jpeg" | "image/png" | "image/webp" }[] = [];
-    for (const f of Array.from(files)) {
+    for (const f of selectedFiles) {
       const err = validateImageFile(f);
       if (err) { setError(err); continue; }
       const ok = await verifyImageMagicBytes(f);
@@ -349,10 +351,10 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
 
       {/* Hidden inputs */}
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/jpg,.jpg,.jpeg,.png,.webp" multiple className="hidden"
-        onChange={(e) => { if (e.target.files?.length) processFiles(e.target.files); e.target.value = ""; }}
+        onChange={(e) => { const files = Array.from(e.target.files ?? []); if (files.length) processFiles(files); e.target.value = ""; }}
       />
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
-        onChange={(e) => { if (e.target.files?.[0]) processFiles([e.target.files[0]]); e.target.value = ""; }}
+        onChange={(e) => { const files = Array.from(e.target.files ?? []); if (files[0]) processFiles([files[0]]); e.target.value = ""; }}
       />
 
       {/* Context */}
