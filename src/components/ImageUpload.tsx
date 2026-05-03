@@ -44,6 +44,34 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
+  const downscaleImage = (file: File, mime: "image/jpeg" | "image/png" | "image/webp"): Promise<{ base64: string; dataUrl: string; mime: string }> =>
+    new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 1600;
+        let { width, height } = img;
+        const scale = Math.min(1, MAX_DIM / Math.max(width, height));
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { URL.revokeObjectURL(url); reject(new Error("Canvas unsupported")); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        // Always re-encode as JPEG for size; PNG kept as PNG for transparency
+        const outMime = mime === "image/png" ? "image/png" : "image/jpeg";
+        const dataUrl = canvas.toDataURL(outMime, 0.85);
+        URL.revokeObjectURL(url);
+        const base64 = dataUrl.split(",")[1];
+        if (!base64) { reject(new Error("Encoding failed")); return; }
+        resolve({ base64, dataUrl, mime: outMime });
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image decode failed")); };
+      img.src = url;
+    });
+
   const processFiles = useCallback(async (files: FileList | File[]) => {
     setError(null);
     const { validateImageFile, verifyImageMagicBytes, resolveImageMime } = await import("@/lib/validation");
@@ -63,26 +91,24 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
       return;
     }
 
-    accepted.forEach(({ file, mime }) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        const base64 = result.split(",")[1];
+    for (const { file, mime } of accepted) {
+      try {
+        const { base64, dataUrl, mime: outMime } = await downscaleImage(file, mime);
         const id = `img-${nextId++}`;
         setImages(prev => {
           if (prev.length >= MAX_IMAGES) return prev;
           const newImages = [...prev, {
-            id, base64, mimeType: mime, preview: result,
+            id, base64, mimeType: outMime, preview: dataUrl,
             label: `Image ${prev.length + 1}`, note: "",
             timestamp: new Date().toISOString().split("T")[0], tags: [],
           }];
           if (newImages.length >= 2) setViewMode("timeline");
           return newImages;
         });
-      };
-      reader.onerror = () => setError(`Could not read "${file.name}". Try another image.`);
-      reader.readAsDataURL(file);
-    });
+      } catch (e: any) {
+        setError(`Could not process "${file.name}": ${e?.message ?? "unknown error"}`);
+      }
+    }
   }, [images.length]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {

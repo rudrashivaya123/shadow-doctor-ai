@@ -104,7 +104,7 @@ export const ageInputSchema = z
 // ── Image upload ────────────────────────────────────────────────────────────
 
 export const ALLOWED_IMAGE_MIME = ["image/jpeg", "image/png", "image/webp"] as const;
-export const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
+export const MAX_IMAGE_BYTES = 25 * 1024 * 1024; // 25MB raw (auto-downscaled before upload)
 export const MAX_IMAGES_PER_UPLOAD = 5;
 
 /**
