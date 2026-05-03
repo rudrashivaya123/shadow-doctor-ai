@@ -112,7 +112,12 @@ export const MAX_IMAGES_PER_UPLOAD = 5;
  * Returns null if valid, else an error string.
  */
 export function validateImageFile(file: File): string | null {
-  if (!ALLOWED_IMAGE_MIME.includes(file.type as any)) {
+  // Some mobile browsers report empty or non-standard MIME types for gallery/camera files.
+  // Fall back to extension sniffing so legitimate JPEG/PNG/WebP files aren't silently rejected.
+  const name = (file.name || "").toLowerCase();
+  const extOk = /\.(jpe?g|png|webp)$/i.test(name);
+  const mimeOk = ALLOWED_IMAGE_MIME.includes(file.type as any);
+  if (!mimeOk && !extOk) {
     return `Unsupported file type. Use JPEG, PNG, or WebP.`;
   }
   if (file.size > MAX_IMAGE_BYTES) {
@@ -121,6 +126,19 @@ export function validateImageFile(file: File): string | null {
   if (file.size === 0) {
     return `File "${file.name}" is empty.`;
   }
+  return null;
+}
+
+/**
+ * Resolve the effective MIME type for a file, falling back to extension when the
+ * browser doesn't report one (common on Android camera/gallery uploads).
+ */
+export function resolveImageMime(file: File): "image/jpeg" | "image/png" | "image/webp" | null {
+  if (ALLOWED_IMAGE_MIME.includes(file.type as any)) return file.type as any;
+  const name = (file.name || "").toLowerCase();
+  if (/\.(jpe?g)$/i.test(name)) return "image/jpeg";
+  if (/\.png$/i.test(name)) return "image/png";
+  if (/\.webp$/i.test(name)) return "image/webp";
   return null;
 }
 
