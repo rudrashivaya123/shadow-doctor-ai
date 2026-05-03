@@ -322,7 +322,7 @@ const ImageUpload = ({ onSubmit, onCompare, isLoading, isComparing, language }: 
       )}
 
       {/* Hidden inputs */}
-      <input ref={fileRef} type="file" accept="image/jpeg,image/png" multiple className="hidden"
+      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/jpg,.jpg,.jpeg,.png,.webp" multiple className="hidden"
         onChange={(e) => { if (e.target.files?.length) processFiles(e.target.files); e.target.value = ""; }}
       />
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
