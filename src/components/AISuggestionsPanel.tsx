@@ -1,4 +1,4 @@
-import { AlertTriangle, AlertCircle, CheckCircle, Siren, Stethoscope, Brain, FlaskConical, Pill, ShieldAlert, Lock, Crown } from "lucide-react";
+import { AlertTriangle, AlertCircle, CheckCircle, Siren, Stethoscope, Brain, FlaskConical, Pill, ShieldAlert, Lock, Crown, Leaf } from "lucide-react";
 import type { ClinicalAnalysis } from "@/types/clinical";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
