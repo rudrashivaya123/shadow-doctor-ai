@@ -47,6 +47,9 @@ export interface ClinicalAnalysis {
   immediate_management: string[];
   investigations: string[];
   treatment: string[];
+  otc_recommendations?: OTCRecommendation[];
+  otc_safety_level?: "LOW_RISK" | "CAUTION" | "NOT_RECOMMENDED";
+  otc_note?: string;
   red_flags: string[];
   missed_possibilities: string[];
   reasoning: string;
