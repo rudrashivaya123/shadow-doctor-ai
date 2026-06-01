@@ -82,11 +82,30 @@ function buildDiagnosticianParams(learningMode: boolean) {
       immediate_management: { type: "array", items: { type: "string" } },
       investigations: { type: "array", items: { type: "string" } },
       treatment: { type: "array", items: { type: "string" } },
+      otc_recommendations: {
+        type: "array",
+        description: "Safe OTC medication recommendations for symptomatic relief. Empty array if not clinically appropriate.",
+        items: {
+          type: "object",
+          properties: {
+            symptom: { type: "string", description: "Symptom/indication, e.g. 'Fever / Body Ache'" },
+            medication: { type: "string" },
+            active_ingredient: { type: "string" },
+            adult_dose: { type: "string" },
+            max_daily_dose: { type: "string" },
+            precautions: { type: "string" },
+          },
+          required: ["symptom", "medication", "active_ingredient", "adult_dose", "max_daily_dose", "precautions"],
+          additionalProperties: false,
+        },
+      },
+      otc_safety_level: { type: "string", enum: ["LOW_RISK", "CAUTION", "NOT_RECOMMENDED"] },
+      otc_note: { type: "string", description: "Brief note when OTC requires caution or is not recommended" },
       red_flags: { type: "array", items: { type: "string" } },
       missed_possibilities: { type: "array", items: { type: "string" } },
       reasoning: { type: "string", description: "Step-by-step clinical reasoning" },
     },
-    required: ["primary_diagnosis", "differentials", "emergency_level", "risk_score", "immediate_management", "investigations", "treatment", "red_flags", "missed_possibilities", "reasoning"],
+    required: ["primary_diagnosis", "differentials", "emergency_level", "risk_score", "immediate_management", "investigations", "treatment", "otc_recommendations", "otc_safety_level", "red_flags", "missed_possibilities", "reasoning"],
     additionalProperties: false,
   };
 
@@ -214,8 +233,9 @@ YOUR TASK: Analyze symptoms using structured 9-step clinical reasoning:
 5. Most likely diagnosis with reasoning (never definitive — use "probable", "consistent with")
 6. Investigation-first approach — suggest tests BEFORE confirming
 7. Safe treatment plan — first-line, guideline-based, Indian generics
-8. Missed possibilities — rare but dangerous conditions
-9. Clinical reasoning — step-by-step with textbook references
+8. OTC Medication Recommendations — provide safe over-the-counter options ONLY for symptomatic relief when clinically appropriate. Use ONLY OTC drugs (paracetamol, ibuprofen with caution, cetirizine, loratadine, dextromethorphan, guaifenesin, antacids, ORS, saline nasal spray, topical antiseptics, etc.). NEVER recommend antibiotics, steroids, anticoagulants, opioids, benzodiazepines, or any prescription-only medicines as OTC. Always include max daily dose and precautions (liver/kidney disease, pregnancy, allergies, drug interactions, pediatric limits). Set otc_safety_level: LOW_RISK (safe), CAUTION (use with care, set otc_note), or NOT_RECOMMENDED (return empty otc_recommendations and explain in otc_note). For HIGH RISK / emergency presentations, return empty otc_recommendations and set otc_safety_level=NOT_RECOMMENDED.
+9. Missed possibilities — rare but dangerous conditions
+10. Clinical reasoning — step-by-step with textbook references
 
 Personalize for Indian epidemiological context (tropical infections, drug availability, cost).
 ${learningInstructions}
@@ -356,6 +376,11 @@ Perform final safety review and generate safety output.`;
       immediate_management: diagnosticianResult.immediate_management || [],
       investigations: uniqueInvestigations,
       treatment: diagnosticianResult.treatment || [],
+      otc_recommendations: safetyResult.emergency_override ? [] : (diagnosticianResult.otc_recommendations || []),
+      otc_safety_level: safetyResult.emergency_override ? "NOT_RECOMMENDED" : (diagnosticianResult.otc_safety_level || "LOW_RISK"),
+      otc_note: safetyResult.emergency_override
+        ? "OTC medications are not appropriate as primary management for this presentation. Immediate medical evaluation is recommended."
+        : (diagnosticianResult.otc_note || ""),
       red_flags: safetyResult.final_red_flags || diagnosticianResult.red_flags || [],
       missed_possibilities: uniqueMissed,
       reasoning: diagnosticianResult.reasoning,
