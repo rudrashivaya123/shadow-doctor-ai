@@ -166,6 +166,71 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
         </ol>
       </div>
 
+      {/* OTC Medication Recommendations */}
+      <div className="glass-card p-4 space-y-3 border-l-2 border-l-teal-500/60">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <Leaf className="h-4 w-4 text-teal-400" />
+            <h3 className="font-semibold text-foreground">OTC Medication Recommendations</h3>
+          </div>
+          <Badge className={`${otcBadge.cls} text-[10px] h-5`}>{otcBadge.label}</Badge>
+        </div>
+
+        {isEmergency ? (
+          <div className="alert-critical border rounded-md p-3 text-sm flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>
+              {safe.otc_note ||
+                "OTC medications are not appropriate as primary management for this presentation. Immediate medical evaluation is recommended."}
+            </span>
+          </div>
+        ) : safe.otc_recommendations.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {safe.otc_note || "No OTC medications recommended for this presentation."}
+          </p>
+        ) : (
+          <>
+            {safe.otc_safety_level === "CAUTION" && safe.otc_note && (
+              <div className="alert-warning border rounded-md p-2 text-xs flex items-start gap-2">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <span>{safe.otc_note}</span>
+              </div>
+            )}
+            <div className="space-y-2">
+              {safe.otc_recommendations.map((rx, i) => (
+                <div key={i} className="rounded-md border border-border/60 bg-card/40 p-3 space-y-1.5">
+                  <div className="text-xs font-semibold text-teal-400 uppercase tracking-wide">
+                    {rx.symptom}
+                  </div>
+                  <div className="text-sm font-medium text-foreground">
+                    {rx.medication}
+                    {rx.active_ingredient && (
+                      <span className="text-muted-foreground font-normal"> · {rx.active_ingredient}</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-0.5 text-xs text-foreground/80">
+                    <div><span className="text-muted-foreground">Adult dose:</span> {rx.adult_dose}</div>
+                    <div><span className="text-muted-foreground">Max/day:</span> {rx.max_daily_dose}</div>
+                  </div>
+                  {rx.precautions && (
+                    <div className="text-xs text-warning flex items-start gap-1.5">
+                      <ShieldAlert className="h-3 w-3 shrink-0 mt-0.5" />
+                      <span>{rx.precautions}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        <p className="text-[10px] text-muted-foreground italic border-t border-border/40 pt-2">
+          OTC recommendations are intended for symptomatic relief only and do not replace professional medical evaluation, diagnosis, or treatment.
+        </p>
+      </div>
+
+
+
       {/* Clinical Reasoning */}
       {safe.reasoning && (
         reasoningLocked ? (
