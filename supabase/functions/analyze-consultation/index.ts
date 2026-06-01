@@ -82,11 +82,30 @@ function buildDiagnosticianParams(learningMode: boolean) {
       immediate_management: { type: "array", items: { type: "string" } },
       investigations: { type: "array", items: { type: "string" } },
       treatment: { type: "array", items: { type: "string" } },
+      otc_recommendations: {
+        type: "array",
+        description: "Safe OTC medication recommendations for symptomatic relief. Empty array if not clinically appropriate.",
+        items: {
+          type: "object",
+          properties: {
+            symptom: { type: "string", description: "Symptom/indication, e.g. 'Fever / Body Ache'" },
+            medication: { type: "string" },
+            active_ingredient: { type: "string" },
+            adult_dose: { type: "string" },
+            max_daily_dose: { type: "string" },
+            precautions: { type: "string" },
+          },
+          required: ["symptom", "medication", "active_ingredient", "adult_dose", "max_daily_dose", "precautions"],
+          additionalProperties: false,
+        },
+      },
+      otc_safety_level: { type: "string", enum: ["LOW_RISK", "CAUTION", "NOT_RECOMMENDED"] },
+      otc_note: { type: "string", description: "Brief note when OTC requires caution or is not recommended" },
       red_flags: { type: "array", items: { type: "string" } },
       missed_possibilities: { type: "array", items: { type: "string" } },
       reasoning: { type: "string", description: "Step-by-step clinical reasoning" },
     },
-    required: ["primary_diagnosis", "differentials", "emergency_level", "risk_score", "immediate_management", "investigations", "treatment", "red_flags", "missed_possibilities", "reasoning"],
+    required: ["primary_diagnosis", "differentials", "emergency_level", "risk_score", "immediate_management", "investigations", "treatment", "otc_recommendations", "otc_safety_level", "red_flags", "missed_possibilities", "reasoning"],
     additionalProperties: false,
   };
 
