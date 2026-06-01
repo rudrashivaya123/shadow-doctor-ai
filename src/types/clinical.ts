@@ -40,6 +40,15 @@ export interface MultiAgentMetadata {
   safety: SafetyOutput;
 }
 
+export interface OTCRecommendation {
+  symptom: string;
+  medication: string;
+  active_ingredient: string;
+  adult_dose: string;
+  max_daily_dose: string;
+  precautions: string;
+}
+
 export interface ClinicalAnalysis {
   primary_diagnosis: string;
   differentials: string[];
