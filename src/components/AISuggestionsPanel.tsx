@@ -41,7 +41,17 @@ const AISuggestionsPanel = ({ analysis, reasoningLocked = false }: AISuggestions
     differentials: analysis.differentials ?? [],
     investigations: analysis.investigations ?? [],
     treatment: analysis.treatment ?? [],
+    otc_recommendations: analysis.otc_recommendations ?? [],
+    otc_safety_level: analysis.otc_safety_level ?? "LOW_RISK",
+    otc_note: analysis.otc_note ?? "",
   };
+
+  const isEmergency = safe.emergency_level === "HIGH RISK" || safe.otc_safety_level === "NOT_RECOMMENDED";
+  const otcBadge = isEmergency
+    ? { cls: "bg-destructive text-destructive-foreground", label: "🔴 OTC Not Recommended" }
+    : safe.otc_safety_level === "CAUTION"
+    ? { cls: "bg-warning text-warning-foreground", label: "🟡 Use With Caution" }
+    : { cls: "bg-success text-success-foreground", label: "🟢 Low Risk" };
 
   return (
     <div className="space-y-4">
