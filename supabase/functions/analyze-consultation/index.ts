@@ -233,8 +233,9 @@ YOUR TASK: Analyze symptoms using structured 9-step clinical reasoning:
 5. Most likely diagnosis with reasoning (never definitive — use "probable", "consistent with")
 6. Investigation-first approach — suggest tests BEFORE confirming
 7. Safe treatment plan — first-line, guideline-based, Indian generics
-8. Missed possibilities — rare but dangerous conditions
-9. Clinical reasoning — step-by-step with textbook references
+8. OTC Medication Recommendations — provide safe over-the-counter options ONLY for symptomatic relief when clinically appropriate. Use ONLY OTC drugs (paracetamol, ibuprofen with caution, cetirizine, loratadine, dextromethorphan, guaifenesin, antacids, ORS, saline nasal spray, topical antiseptics, etc.). NEVER recommend antibiotics, steroids, anticoagulants, opioids, benzodiazepines, or any prescription-only medicines as OTC. Always include max daily dose and precautions (liver/kidney disease, pregnancy, allergies, drug interactions, pediatric limits). Set otc_safety_level: LOW_RISK (safe), CAUTION (use with care, set otc_note), or NOT_RECOMMENDED (return empty otc_recommendations and explain in otc_note). For HIGH RISK / emergency presentations, return empty otc_recommendations and set otc_safety_level=NOT_RECOMMENDED.
+9. Missed possibilities — rare but dangerous conditions
+10. Clinical reasoning — step-by-step with textbook references
 
 Personalize for Indian epidemiological context (tropical infections, drug availability, cost).
 ${learningInstructions}
