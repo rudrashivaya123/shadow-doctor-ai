@@ -376,6 +376,11 @@ Perform final safety review and generate safety output.`;
       immediate_management: diagnosticianResult.immediate_management || [],
       investigations: uniqueInvestigations,
       treatment: diagnosticianResult.treatment || [],
+      otc_recommendations: safetyResult.emergency_override ? [] : (diagnosticianResult.otc_recommendations || []),
+      otc_safety_level: safetyResult.emergency_override ? "NOT_RECOMMENDED" : (diagnosticianResult.otc_safety_level || "LOW_RISK"),
+      otc_note: safetyResult.emergency_override
+        ? "OTC medications are not appropriate as primary management for this presentation. Immediate medical evaluation is recommended."
+        : (diagnosticianResult.otc_note || ""),
       red_flags: safetyResult.final_red_flags || diagnosticianResult.red_flags || [],
       missed_possibilities: uniqueMissed,
       reasoning: diagnosticianResult.reasoning,
