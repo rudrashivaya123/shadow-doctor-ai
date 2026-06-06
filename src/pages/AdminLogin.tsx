@@ -7,8 +7,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-const ADMIN_EMAIL = "shadowmd.app@gmail.com";
-
 const AdminLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -18,24 +16,14 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (email.toLowerCase() !== ADMIN_EMAIL) {
-      navigate("/", { replace: true });
-      return;
-    }
-
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email?.toLowerCase() !== ADMIN_EMAIL) {
-        await supabase.auth.signOut();
-        navigate("/", { replace: true });
-        return;
-      }
-
+      // Server-side check happens in the admin-data edge function; if not admin
+      // the dashboard will redirect back here. We do not check the admin email
+      // on the client to avoid disclosing the admin identity in the bundle.
       navigate("/admin-secret-shadowmd/dashboard", { replace: true });
     } catch (err: any) {
       toast({

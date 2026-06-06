@@ -56,12 +56,10 @@ Deno.serve(async (req) => {
       // No body — default to admin dashboard action
     }
 
-    // ─── Action: expire-trial (dev testing, any authenticated user can expire their own trial) ───
+    // ─── Action: expire-trial (user can only expire their OWN trial; end_date forced to the past) ───
     if (body?.action === "expire-trial") {
       const targetUserId = body.user_id;
-      const endDate = body.end_date;
 
-      // Only allow users to expire their own trial
       if (targetUserId !== user.id) {
         return new Response(JSON.stringify({ error: "Forbidden" }), {
           status: 403,
@@ -69,10 +67,13 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Force end date to a past timestamp — ignore client-supplied value to prevent trial extension
+      const pastDate = new Date(Date.now() - 60_000).toISOString();
+
       const { error: updateError } = await adminClient
         .from("subscriptions")
         .update({
-          subscription_end_date: endDate,
+          subscription_end_date: pastDate,
           updated_at: new Date().toISOString(),
         })
         .eq("user_id", targetUserId)
