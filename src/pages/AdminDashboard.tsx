@@ -13,8 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-const ADMIN_EMAIL = "shadowmd.app@gmail.com";
-
 type AdminTab = "dashboard" | "users" | "payments";
 
 interface UserRow {
@@ -38,19 +36,20 @@ const AdminDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
   const [metrics, setMetrics] = useState({ totalUsers: 0, totalPayments: 0, activeSubscriptions: 0, revenue: 0 });
   const [users, setUsers] = useState<UserRow[]>([]);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
 
-  // Auth guard
+  // Auth guard — only checks for ANY logged-in user; admin gating happens server-side
   useEffect(() => {
-    if (!authLoading && (!user || user.email?.toLowerCase() !== ADMIN_EMAIL)) {
+    if (!authLoading && !user) {
       navigate("/admin-secret-shadowmd", { replace: true });
     }
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (!user || user.email?.toLowerCase() !== ADMIN_EMAIL) return;
+    if (!user) return;
     fetchData();
   }, [user]);
 
@@ -64,15 +63,23 @@ const AdminDashboard = () => {
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/admin-data`,
         {
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          body: "{}",
         }
       );
+      if (res.status === 403 || res.status === 401) {
+        // Not an admin — redirect away without disclosing why
+        navigate("/admin-secret-shadowmd", { replace: true });
+        return;
+      }
       if (!res.ok) throw new Error("Failed to fetch admin data");
       const data = await res.json();
 
+      setAuthorized(true);
       setMetrics(data.metrics);
       setUsers(data.users || []);
       setPayments(data.payments || []);
@@ -96,7 +103,7 @@ const AdminDashboard = () => {
     );
   }
 
-  if (!user || user.email?.toLowerCase() !== ADMIN_EMAIL) return null;
+  if (!user || (!loading && !authorized)) return null;
 
   const sidebarItems: { label: string; value: AdminTab; icon: typeof LayoutDashboard }[] = [
     { label: "Dashboard", value: "dashboard", icon: LayoutDashboard },
